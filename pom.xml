@@ -20,7 +20,7 @@
     <groupId>org.wso2.carbon.identity.framework</groupId>
     <artifactId>identity-framework</artifactId>
     <packaging>pom</packaging>
-    <version>7.8.23</version>
+    <version>7.8.23.1-SNAPSHOT</version>
     <name>WSO2 Carbon - Platform Aggregator Pom</name>
     <url>http://wso2.org</url>
 
@@ -1905,7 +1905,7 @@
         <org.wso2.carbon.database.utils.version.range>[2.0.0,3.0.0)</org.wso2.carbon.database.utils.version.range>
 
         <!--Carbon identity version-->
-        <identity.framework.version>${project.version}</identity.framework.version>
+        <identity.framework.version>7.8.23.1-SNAPSHOT</identity.framework.version>
         <carbon.identity.package.export.version>${project.version}</carbon.identity.package.export.version>
         <carbon.identity.package.import.version.range>[5.14.0, 8.0.0)</carbon.identity.package.import.version.range>
 
@@ -2140,7 +2140,7 @@
         <maven.build.helper.plugin.version>3.0.0</maven.build.helper.plugin.version>
         <swagger2cxf-maven-plugin.version>1.0-SNAPSHOT</swagger2cxf-maven-plugin.version>
 
-        <project.scm.id>my-scm-server</project.scm.id>
+        <project.scm.id>wso2-scm-server</project.scm.id>
 
         <jersey-version>1.19.1</jersey-version>
 
