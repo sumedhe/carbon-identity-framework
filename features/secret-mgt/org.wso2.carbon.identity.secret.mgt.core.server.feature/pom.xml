@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.framework</groupId>
         <artifactId>secret-mgt-feature</artifactId>
-        <version>7.8.23.1-SNAPSHOT</version>
+        <version>7.8.23.1</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -76,9 +76,9 @@
                         <phase>install</phase>
                         <configuration>
                             <tasks>
-                                <delete dir="src/main/resources"/>
-                                <delete dir="src/main"/>
-                                <delete dir="src"/>
+                                <delete dir="src/main/resources" />
+                                <delete dir="src/main" />
+                                <delete dir="src" />
                             </tasks>
                         </configuration>
                         <goals>
