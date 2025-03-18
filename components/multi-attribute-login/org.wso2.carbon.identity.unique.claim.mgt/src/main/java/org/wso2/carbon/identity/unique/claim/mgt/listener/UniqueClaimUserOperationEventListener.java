@@ -127,6 +127,17 @@ public class UniqueClaimUserOperationEventListener extends AbstractIdentityUserO
         return true;
     }
 
+    /**
+     * Validates that user claims are unique and do not conflict with existing users' attributes.
+     * Also ensures that the password is not used as an attribute value.
+     *
+     * @param username         The username of the user whose claims are being validated.
+     * @param claims           A map of claim URIs and their respective values to be validated.
+     * @param profile          The profile name associated with the claims.
+     * @param userStoreManager The user store manager responsible for handling user attributes.
+     * @param credential       The user's password or authentication credential.
+     * @throws UserStoreException If a claim value is not unique or if the password matches a claim value.
+     */
     private void checkClaimUniqueness(String username, Map<String, String> claims, String profile,
                                       UserStoreManager userStoreManager, Object credential) throws UserStoreException {
 
