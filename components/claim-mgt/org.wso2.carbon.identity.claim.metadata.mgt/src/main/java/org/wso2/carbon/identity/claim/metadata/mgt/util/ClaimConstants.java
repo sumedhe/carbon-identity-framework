@@ -56,6 +56,7 @@ public class ClaimConstants {
     public static final String SHARED_PROFILE_VALUE_RESOLVING_METHOD = "SharedProfileValueResolvingMethod";
     public static final String EXTERNAL_CLAIM_ADDITION_NOT_ALLOWED_FOR_DIALECT =
             "ExternalClaimAdditionNotAllowedForDialect";
+    public static final String MULTI_VALUED_PROPERTY = "multiValued";
 
     /**
      * Enum for error messages.
