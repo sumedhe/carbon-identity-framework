@@ -283,19 +283,9 @@ public class APIResourceManagementDAOImpl implements APIResourceManagementDAO {
     @Override
     public APIResource getAPIResourceById(String apiId, Integer tenantId) throws APIResourceMgtException {
 
-        String query = SQLConstants.GET_API_RESOURCE_BY_ID;
-        try {
-            if (OrganizationManagementUtil.isOrganization(tenantId)) {
-                tenantId = getRootOrganizationTenantId(tenantId);
-                query = SQLConstants.GET_API_RESOURCE_BY_ID_FOR_ORGANIZATIONS;
-            }
-        } catch (OrganizationManagementException e) {
-            throw APIResourceManagementUtil.handleServerException(APIResourceManagementConstants.ErrorMessages.
-                            ERROR_CODE_ERROR_WHILE_RESOLVING_ORGANIZATION_FOR_TENANT, e,
-                    IdentityTenantUtil.getTenantDomain(tenantId));
-        }
         try (Connection dbConnection = IdentityDatabaseUtil.getDBConnection(false);
-             PreparedStatement preparedStatement = dbConnection.prepareStatement(query)) {
+             PreparedStatement preparedStatement = dbConnection.prepareStatement(
+                     SQLConstants.GET_API_RESOURCE_BY_ID)) {
             preparedStatement.setString(1, apiId);
             preparedStatement.setInt(2, tenantId);
             ResultSet resultSet = preparedStatement.executeQuery();
