@@ -126,6 +126,7 @@ public class SQLConstants {
             " S.DESCRIPTION AS SCOPE_DESCRIPTION" +
             " FROM API_RESOURCE AR LEFT JOIN SCOPE S ON AR.ID = S.API_ID WHERE AR.ID = ? AND (AR.TENANT_ID = ?" +
             " OR AR.TENANT_ID IS NULL)";
+    @Deprecated
     public static final String GET_API_RESOURCE_BY_ID_FOR_ORGANIZATIONS = "SELECT" +
             " AR.ID AS API_RESOURCE_ID," +
             " AR.NAME AS API_RESOURCE_NAME," +
