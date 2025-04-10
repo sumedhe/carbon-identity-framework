@@ -736,6 +736,50 @@ public class FrameworkUtils {
     }
 
     /**
+     * Remove the cookie and redirect during an authentication flow failure.
+     *
+     * @param request       Http servlet request.
+     * @param response      Http servlet response.
+     * @param context       Authentication Context.
+     * @throws IOException
+     */
+    public static void removeCookieAndRedirect(HttpServletRequest request, HttpServletResponse response,
+                                               AuthenticationContext context) throws IOException {
+
+        /* If the service provider can be retrieved from the authentication context and an access URL is configured,
+         redirect to that URL. For all other scenarios, redirect to the retry page. */
+        try {
+            if (context != null && context.getServiceProviderName() != null) {
+                ServiceProvider serviceProvider = ApplicationManagementService.getInstance().getServiceProvider(
+                        context.getServiceProviderName(), context.getTenantDomain());
+                String accessUrl = serviceProvider.getAccessUrl();
+
+                if (StringUtils.isBlank(accessUrl)) {
+                    sendToRetryPage(request, response, context);
+                    return;
+                }
+
+                request.setAttribute(FrameworkConstants.RequestParams.FLOW_STATUS, AuthenticatorFlowStatus.INCOMPLETE);
+                request.setAttribute(FrameworkConstants.IS_SENT_TO_RETRY, true);
+                response.sendRedirect(accessUrl);
+            } else {
+                sendToRetryPage(request, response, context);
+            }
+        } catch (IdentityApplicationManagementException e) {
+            log.error("Error occurred while retrieving service provider", e);
+            sendToRetryPage(request, response, context);
+        } finally {
+            List<String> cookiesToInvalidateConfig = IdentityUtil.getCookiesToInvalidateConfigurationHolder();
+            if (ArrayUtils.isNotEmpty(request.getCookies())) {
+                Arrays.stream(request.getCookies())
+                        .filter(cookie -> cookiesToInvalidateConfig.stream()
+                                .anyMatch(cookieToInvalidate -> cookie.getName().contains(cookieToInvalidate)))
+                        .forEach(cookie -> removeCookie(request, response, cookie.getName()));
+            }
+        }
+    }
+
+    /**
      * This method is used to append sp name and sp tenant domain as parameter to a given url. Those information will
      * be fetched from request parameters or referer.
      *

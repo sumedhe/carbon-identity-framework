@@ -54,6 +54,7 @@ import org.wso2.carbon.identity.application.authentication.framework.internal.Fr
 import org.wso2.carbon.identity.application.authentication.framework.model.AuthenticatedUser;
 import org.wso2.carbon.identity.application.authentication.framework.model.CommonAuthResponseWrapper;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkErrorConstants;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.authentication.framework.util.LoginContextManagementUtil;
 import org.wso2.carbon.identity.application.common.model.ClaimMapping;
@@ -453,15 +454,20 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
             FrameworkUtils.sendToRetryPage(request, responseWrapper, context, errorWrapper.getStatus(),
                     errorWrapper.getStatusMsg());
         } catch (Exception e) {
-            if ((e instanceof FrameworkException)
-                    && (NONCE_ERROR_CODE.equals(((FrameworkException) e).getErrorCode()))) {
+            if (e instanceof FrameworkException) {
                 if (log.isDebugEnabled()) {
                     log.debug(e.getMessage(), e);
                 }
-                request.setAttribute(FrameworkConstants.RESTART_LOGIN_FLOW, "true");
-                throw new CookieValidationFailedException(NONCE_ERROR_CODE, "Session nonce cookie value is not " +
-                        "matching " +
-                        "for session with sessionDataKey: " + request.getParameter("sessionDataKey"));
+                if (NONCE_ERROR_CODE.equals(((FrameworkException) e).getErrorCode())) {
+                    request.setAttribute(FrameworkConstants.RESTART_LOGIN_FLOW, "true");
+                    throw new CookieValidationFailedException(NONCE_ERROR_CODE, "Session nonce cookie value is not " +
+                            "matching " +
+                            "for session with sessionDataKey: " + request.getParameter("sessionDataKey"));
+                }
+                if (FrameworkErrorConstants.ErrorMessages.MISMATCHING_TENANT_DOMAIN.getCode()
+                        .equals(((FrameworkException) e).getErrorCode())) {
+                    FrameworkUtils.removeCookieAndRedirect(request, responseWrapper, context);
+                }
             } else {
                 log.error("Exception in Authentication Framework", e);
                 FrameworkUtils.sendToRetryPage(request, responseWrapper, context);
