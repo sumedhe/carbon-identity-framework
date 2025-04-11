@@ -461,12 +461,13 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
                 if (NONCE_ERROR_CODE.equals(((FrameworkException) e).getErrorCode())) {
                     request.setAttribute(FrameworkConstants.RESTART_LOGIN_FLOW, "true");
                     throw new CookieValidationFailedException(NONCE_ERROR_CODE, "Session nonce cookie value is not " +
-                            "matching " +
-                            "for session with sessionDataKey: " + request.getParameter("sessionDataKey"));
+                            "matching for session with sessionDataKey: " + request.getParameter("sessionDataKey"));
                 }
-                if (FrameworkErrorConstants.ErrorMessages.MISMATCHING_TENANT_DOMAIN.getCode()
+                if (FrameworkErrorConstants.ErrorMessages.ERROR_MISMATCHING_TENANT_DOMAIN.getCode()
                         .equals(((FrameworkException) e).getErrorCode())) {
-                    FrameworkUtils.removeCookieAndRedirect(request, responseWrapper, context);
+                    request.setAttribute(FrameworkConstants.RESTART_LOGIN_FLOW, "true");
+                    request.setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, "true");
+                    throw new CookieValidationFailedException(((FrameworkException) e).getErrorCode(), e.getMessage());
                 }
             } else {
                 log.error("Exception in Authentication Framework", e);
