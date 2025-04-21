@@ -801,7 +801,7 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         context.setProperty(FrameworkConstants.SP_REQUESTED_CLAIMS_IN_REQUEST, requestedClaimsInRequest);
 
         associateTransientRequestData(request, response, context);
-        findPreviousAuthenticatedSession(request, context);
+        findPreviousAuthenticatedSession(request, response, context);
         buildOutboundQueryString(request, context);
 
         String redirectUrl = request.getParameter(REDIRECT_URI);
@@ -887,7 +887,8 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         return null;
     }
 
-    protected void findPreviousAuthenticatedSession(HttpServletRequest request, AuthenticationContext context)
+    protected void findPreviousAuthenticatedSession(HttpServletRequest request, HttpServletResponse response,
+                                                    AuthenticationContext context)
             throws FrameworkException {
 
         List<String> acrRequested = getAcrRequested(request);
@@ -908,7 +909,8 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         }
         // Get service provider chain
         SequenceConfig effectiveSequence = getSequenceConfig(context, request.getParameterMap());
-        String applicationName = effectiveSequence.getApplicationConfig().getApplicationName();
+        ApplicationConfig applicationConfig = effectiveSequence.getApplicationConfig();
+        String applicationName = applicationConfig.getApplicationName();
         // organization SSO IDP is added for portal apps only if requested with FIDP param.
         if (FrameworkConstants.Application.CONSOLE_APP.equals(applicationName) ||
                 FrameworkConstants.Application.MY_ACCOUNT_APP.equals(applicationName)) {
@@ -954,7 +956,7 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
                 //Starting tenant-flow as tenant domain is retrieved downstream from the carbon-context to get the
                 // tenant wise session expiry time
                 FrameworkUtils.startTenantFlow(context.getTenantDomain());
-                sessionContext = FrameworkUtils.getSessionContextFromCache(request, context, sessionContextKey);
+                sessionContext = getSessionContext(request, response, context, applicationConfig, sessionContextKey);
             } finally {
                 FrameworkUtils.endTenantFlow();
             }
@@ -1052,6 +1054,29 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         }
 
         return false;
+    }
+
+
+    private SessionContext getSessionContext(HttpServletRequest request, HttpServletResponse response,
+                                      AuthenticationContext context, ApplicationConfig appConfig,
+                                      String sessionContextKey) throws FrameworkException {
+
+        SessionContext sessionContext = FrameworkUtils.getSessionContextFromCache(request, context, sessionContextKey);
+        if (sessionContext != null && appConfig != null && !appConfig.isSaaSApp()) {
+            /* If the application is non-SaaS, the Service Provider tenant domain must match the user's tenant domain.
+             If there is a mismatch, remove the cookie from the response and set the commonAuthId attribute in the
+             request to ensure the commonAuthId cookie is cleared by the AuthenticationFrameworkWrapper. */
+            boolean isMatchingTenantDomain = StringUtils.equals(
+                    sessionContext.getProperty(FrameworkUtils.TENANT_DOMAIN).toString(),
+                    context.getLoginTenantDomain());
+            if (!isMatchingTenantDomain) {
+                FrameworkUtils.removeCookie(request, response, FrameworkConstants.COMMONAUTH_COOKIE);
+                request.setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, "true");
+                return null;
+            }
+        }
+
+        return sessionContext;
     }
 
     private boolean isDifferent(List<String> newAcrList, List<String> previousAcrList) {

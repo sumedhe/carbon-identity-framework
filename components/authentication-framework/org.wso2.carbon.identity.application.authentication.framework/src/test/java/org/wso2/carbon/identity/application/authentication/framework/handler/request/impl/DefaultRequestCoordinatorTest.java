@@ -374,6 +374,7 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
 
         AuthenticationContext authenticationContext = spy(AuthenticationContext.class);
         when(authenticationContext.getTenantDomain()).thenReturn(testTenantDomain);
+        when(authenticationContext.getLoginTenantDomain()).thenReturn(testTenantDomain);
         when(authenticationContext.getRequestType()).thenReturn(testRequestType);
 
         try (MockedStatic<LoggerUtils> loggerUtilsMockedStatic = mockStatic(LoggerUtils.class);
@@ -396,6 +397,7 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
             frameworkUtilsMockedStatic.when(() -> FrameworkUtils.isAPIBasedAuthenticationFlow(request))
                     .thenReturn(true);
             SessionContext sessionContext = mock(SessionContext.class);
+            when(sessionContext.getProperty(FrameworkUtils.TENANT_DOMAIN)).thenReturn(testTenantDomain);
             frameworkUtilsMockedStatic.
                     when(() -> FrameworkUtils.getSessionContextFromCache(request, authenticationContext, testSessionId))
                     .thenReturn(sessionContext);
@@ -425,7 +427,8 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
             when(authenticatedUser.getTenantDomain()).thenReturn(testTenantDomain);
 
             // Case 1: Authenticated user has a tenant domain.
-            requestCoordinator.findPreviousAuthenticatedSession(request, authenticationContext);
+            requestCoordinator.findPreviousAuthenticatedSession(request, mock(HttpServletResponse.class),
+                    authenticationContext);
 
             assertEquals(authenticationContext.getSubject(), authenticatedUser);
             assertEquals(authenticationContext.getProperty(USER_TENANT_DOMAIN), testTenantDomain);
@@ -435,7 +438,8 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
 
             // Case2: Authenticated user return null tenant domain.
             when(authenticatedUser.getTenantDomain()).thenReturn(null);
-            requestCoordinator.findPreviousAuthenticatedSession(request, authenticationContext);
+            requestCoordinator.findPreviousAuthenticatedSession(request, mock(HttpServletResponse.class),
+                    authenticationContext);
             assertNull(authenticationContext.getProperty(USER_TENANT_DOMAIN));
 
             // Case 3: Authenticated user is null.
@@ -443,7 +447,8 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
             authenticationContext.setSubject(null);
 
             when(sequenceConfig.getAuthenticatedUser()).thenReturn(null);
-            requestCoordinator.findPreviousAuthenticatedSession(request, authenticationContext);
+            requestCoordinator.findPreviousAuthenticatedSession(request, mock(HttpServletResponse.class),
+                    authenticationContext);
             assertNull(authenticationContext.getSubject());
 
         } catch (IdentityApplicationManagementException e) {
