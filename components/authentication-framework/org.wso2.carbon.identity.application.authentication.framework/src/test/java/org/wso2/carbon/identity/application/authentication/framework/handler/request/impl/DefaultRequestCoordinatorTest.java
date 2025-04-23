@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -369,14 +368,10 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
         final String testTenantDomain = "carbon.super";
         final String testRequestType = "testRequestType";
         final String testAppName = "testApp";
-        final HttpServletResponse response = mock(HttpServletResponse.class);
-        Cookie commonAuthIdCookie = new Cookie(FrameworkConstants.COMMONAUTH_COOKIE, "1234");
-        commonAuthIdCookie.setMaxAge(100);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getParameter(FrameworkConstants.RequestParams.SESSION_ID)).thenReturn(testSessionId);
         when(request.getParameter(FrameworkConstants.RequestParams.ISSUER)).thenReturn(testIssuer);
-        when(request.getCookies()).thenReturn(new Cookie[]{commonAuthIdCookie});
 
         AuthenticationContext authenticationContext = spy(AuthenticationContext.class);
         when(authenticationContext.getTenantDomain()).thenReturn(testTenantDomain);
@@ -433,8 +428,7 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
             when(authenticatedUser.getTenantDomain()).thenReturn(testTenantDomain);
 
             // Case 1: Authenticated user has a tenant domain.
-            requestCoordinator.findPreviousAuthenticatedSession(request, response,
-                    authenticationContext);
+            requestCoordinator.findPreviousAuthenticatedSession(request, authenticationContext);
 
             assertEquals(authenticationContext.getSubject(), authenticatedUser);
             assertEquals(authenticationContext.getProperty(USER_TENANT_DOMAIN), testTenantDomain);
@@ -444,8 +438,7 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
 
             // Case2: Authenticated user return null tenant domain.
             when(authenticatedUser.getTenantDomain()).thenReturn(null);
-            requestCoordinator.findPreviousAuthenticatedSession(request, response,
-                    authenticationContext);
+            requestCoordinator.findPreviousAuthenticatedSession(request, authenticationContext);
             assertNull(authenticationContext.getProperty(USER_TENANT_DOMAIN));
 
             // Case 3: Authenticated user is null.
@@ -453,15 +446,13 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
             authenticationContext.setSubject(null);
 
             when(sequenceConfig.getAuthenticatedUser()).thenReturn(null);
-            requestCoordinator.findPreviousAuthenticatedSession(request, response,
-                    authenticationContext);
+            requestCoordinator.findPreviousAuthenticatedSession(request, authenticationContext);
             assertNull(authenticationContext.getSubject());
 
             // Case 4: Mismatch between the sp tenant domain and the user login tenant domain.
             when(authenticationContext.getLoginTenantDomain()).thenReturn("tenant123");
-            requestCoordinator.findPreviousAuthenticatedSession(request, response,
-                    authenticationContext);
-            verify(request).setAttribute(anyString(), anyString());
+            requestCoordinator.findPreviousAuthenticatedSession(request, authenticationContext);
+            verify(request).setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, true);
 
         } catch (IdentityApplicationManagementException e) {
             throw new RuntimeException(e);

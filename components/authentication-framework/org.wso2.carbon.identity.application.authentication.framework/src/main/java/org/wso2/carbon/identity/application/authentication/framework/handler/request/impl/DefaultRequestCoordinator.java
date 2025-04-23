@@ -466,7 +466,7 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
                 if (FrameworkErrorConstants.ErrorMessages.ERROR_MISMATCHING_TENANT_DOMAIN.getCode()
                         .equals(((FrameworkException) e).getErrorCode())) {
                     request.setAttribute(FrameworkConstants.RESTART_LOGIN_FLOW, "true");
-                    request.setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, "true");
+                    request.setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, true);
                     throw new CookieValidationFailedException(((FrameworkException) e).getErrorCode(), e.getMessage());
                 }
             } else {
@@ -476,6 +476,10 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         } finally {
             IdentityUtil.threadLocalProperties.get().remove(FrameworkConstants.AUTHENTICATION_FRAMEWORK_FLOW);
             UserCoreUtil.setDomainInThreadLocal(null);
+            if (Boolean.TRUE.toString().equals(
+                    String.valueOf(request.getAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE)))) {
+                FrameworkUtils.removeCommonAuthCookie(request, response);
+            }
             if (request.getAttribute(FrameworkConstants.RESTART_LOGIN_FLOW) == null ||
                     request.getAttribute(FrameworkConstants.RESTART_LOGIN_FLOW).equals("false")) {
                 unwrapResponse(responseWrapper, sessionDataKey, response, context);
@@ -801,7 +805,7 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         context.setProperty(FrameworkConstants.SP_REQUESTED_CLAIMS_IN_REQUEST, requestedClaimsInRequest);
 
         associateTransientRequestData(request, response, context);
-        findPreviousAuthenticatedSession(request, response, context);
+        findPreviousAuthenticatedSession(request, context);
         buildOutboundQueryString(request, context);
 
         String redirectUrl = request.getParameter(REDIRECT_URI);
@@ -887,30 +891,7 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         return null;
     }
 
-    /**
-     * This is a deprecate method which used to find the previous authenticated session from the cache.
-     *
-     * @param request   HTTP request to retrieve headers.
-     * @param context   Current authentication Context.
-     * @deprecated use {@link #findPreviousAuthenticatedSession(
-     * HttpServletRequest, HttpServletResponse,AuthenticationContext)} instead.
-     */
-    @Deprecated
     protected void findPreviousAuthenticatedSession(HttpServletRequest request, AuthenticationContext context)
-            throws FrameworkException {
-
-        findPreviousAuthenticatedSession(request, null, context);
-    }
-
-    /**
-     * This method is used to find the previous authenticated session from the cache.
-     *
-     * @param request   HTTP request to retrieve headers.
-     * @param response  HTTP response to set cookies.
-     * @param context   Current authentication Context.
-     */
-    protected void findPreviousAuthenticatedSession(HttpServletRequest request, HttpServletResponse response,
-                                                    AuthenticationContext context)
             throws FrameworkException {
 
         List<String> acrRequested = getAcrRequested(request);
@@ -978,7 +959,7 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
                 //Starting tenant-flow as tenant domain is retrieved downstream from the carbon-context to get the
                 // tenant wise session expiry time
                 FrameworkUtils.startTenantFlow(context.getTenantDomain());
-                sessionContext = getSessionContext(request, response, context, applicationConfig, sessionContextKey);
+                sessionContext = getSessionContext(request, context, applicationConfig, sessionContextKey);
             } finally {
                 FrameworkUtils.endTenantFlow();
             }
@@ -1078,23 +1059,20 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         return false;
     }
 
-    private SessionContext getSessionContext(HttpServletRequest request, HttpServletResponse response,
-                                      AuthenticationContext context, ApplicationConfig appConfig,
-                                      String sessionContextKey) throws FrameworkException {
+    private SessionContext getSessionContext(HttpServletRequest request, AuthenticationContext context,
+                                             ApplicationConfig appConfig, String sessionContextKey)
+            throws FrameworkException {
 
         SessionContext sessionContext = FrameworkUtils.getSessionContextFromCache(request, context, sessionContextKey);
         if (sessionContext != null && appConfig != null && !appConfig.isSaaSApp()) {
             /* If the application is non-SaaS, the Service Provider tenant domain must match the user's tenant domain.
-             If there is a mismatch, remove the cookie from the response and set the removeCommonAuthCookie attribute
-             in the request to ensure the commonAuthId cookie is cleared by the AuthenticationFrameworkWrapper. */
+             If there is a mismatch, set the removeCommonAuthCookie attribute in the request to ensure the commonAuthId
+             cookie is cleared by the AuthenticationFrameworkWrapper and remove the cookie from the response. */
             boolean isMatchingTenantDomain = StringUtils.equals(
                     sessionContext.getProperty(FrameworkUtils.TENANT_DOMAIN).toString(),
                     context.getLoginTenantDomain());
             if (!isMatchingTenantDomain) {
-                if (response != null) {
-                    FrameworkUtils.removeCookie(request, response, FrameworkConstants.COMMONAUTH_COOKIE);
-                }
-                request.setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, "true");
+                request.setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, true);
                 return null;
             }
         }
