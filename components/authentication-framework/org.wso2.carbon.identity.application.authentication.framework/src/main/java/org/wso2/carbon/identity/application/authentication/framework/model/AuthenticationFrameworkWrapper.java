@@ -168,9 +168,9 @@ public class AuthenticationFrameworkWrapper extends HttpServletRequestWrapper {
 
         // Exclude and return the commonAuthId cookie, if the request attribute "removeCommonAuthCookie" is set to true.
         Cookie[] cookies = super.getCookies();
-        String retrieveFromWrapper = (String) super.getAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE);
 
-        if (!Boolean.parseBoolean(retrieveFromWrapper)) {
+        if (!Boolean.TRUE.toString().equals(String.valueOf(
+                super.getAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE)))) {
             return cookies;
         }
 

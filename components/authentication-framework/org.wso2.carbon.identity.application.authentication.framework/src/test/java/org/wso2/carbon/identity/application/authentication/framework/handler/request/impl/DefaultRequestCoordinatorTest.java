@@ -64,6 +64,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -374,6 +375,7 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
 
         AuthenticationContext authenticationContext = spy(AuthenticationContext.class);
         when(authenticationContext.getTenantDomain()).thenReturn(testTenantDomain);
+        when(authenticationContext.getLoginTenantDomain()).thenReturn(testTenantDomain);
         when(authenticationContext.getRequestType()).thenReturn(testRequestType);
 
         try (MockedStatic<LoggerUtils> loggerUtilsMockedStatic = mockStatic(LoggerUtils.class);
@@ -396,6 +398,7 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
             frameworkUtilsMockedStatic.when(() -> FrameworkUtils.isAPIBasedAuthenticationFlow(request))
                     .thenReturn(true);
             SessionContext sessionContext = mock(SessionContext.class);
+            when(sessionContext.getProperty(FrameworkUtils.TENANT_DOMAIN)).thenReturn(testTenantDomain);
             frameworkUtilsMockedStatic.
                     when(() -> FrameworkUtils.getSessionContextFromCache(request, authenticationContext, testSessionId))
                     .thenReturn(sessionContext);
@@ -445,6 +448,11 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
             when(sequenceConfig.getAuthenticatedUser()).thenReturn(null);
             requestCoordinator.findPreviousAuthenticatedSession(request, authenticationContext);
             assertNull(authenticationContext.getSubject());
+
+            // Case 4: Mismatch between the sp tenant domain and the user login tenant domain.
+            when(authenticationContext.getLoginTenantDomain()).thenReturn("tenant123");
+            requestCoordinator.findPreviousAuthenticatedSession(request, authenticationContext);
+            verify(request).setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, true);
 
         } catch (IdentityApplicationManagementException e) {
             throw new RuntimeException(e);

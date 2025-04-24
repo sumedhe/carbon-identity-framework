@@ -466,7 +466,7 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
                 if (FrameworkErrorConstants.ErrorMessages.ERROR_MISMATCHING_TENANT_DOMAIN.getCode()
                         .equals(((FrameworkException) e).getErrorCode())) {
                     request.setAttribute(FrameworkConstants.RESTART_LOGIN_FLOW, "true");
-                    request.setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, "true");
+                    request.setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, true);
                     throw new CookieValidationFailedException(((FrameworkException) e).getErrorCode(), e.getMessage());
                 }
             } else {
@@ -476,6 +476,10 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         } finally {
             IdentityUtil.threadLocalProperties.get().remove(FrameworkConstants.AUTHENTICATION_FRAMEWORK_FLOW);
             UserCoreUtil.setDomainInThreadLocal(null);
+            if (Boolean.TRUE.toString().equals(
+                    String.valueOf(request.getAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE)))) {
+                FrameworkUtils.removeCommonAuthCookie(request, response);
+            }
             if (request.getAttribute(FrameworkConstants.RESTART_LOGIN_FLOW) == null ||
                     request.getAttribute(FrameworkConstants.RESTART_LOGIN_FLOW).equals("false")) {
                 unwrapResponse(responseWrapper, sessionDataKey, response, context);
@@ -908,7 +912,8 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         }
         // Get service provider chain
         SequenceConfig effectiveSequence = getSequenceConfig(context, request.getParameterMap());
-        String applicationName = effectiveSequence.getApplicationConfig().getApplicationName();
+        ApplicationConfig applicationConfig = effectiveSequence.getApplicationConfig();
+        String applicationName = applicationConfig.getApplicationName();
         // organization SSO IDP is added for portal apps only if requested with FIDP param.
         if (FrameworkConstants.Application.CONSOLE_APP.equals(applicationName) ||
                 FrameworkConstants.Application.MY_ACCOUNT_APP.equals(applicationName)) {
@@ -954,7 +959,7 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
                 //Starting tenant-flow as tenant domain is retrieved downstream from the carbon-context to get the
                 // tenant wise session expiry time
                 FrameworkUtils.startTenantFlow(context.getTenantDomain());
-                sessionContext = FrameworkUtils.getSessionContextFromCache(request, context, sessionContextKey);
+                sessionContext = getSessionContext(request, context, applicationConfig, sessionContextKey);
             } finally {
                 FrameworkUtils.endTenantFlow();
             }
@@ -1052,6 +1057,27 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         }
 
         return false;
+    }
+
+    private SessionContext getSessionContext(HttpServletRequest request, AuthenticationContext context,
+                                             ApplicationConfig appConfig, String sessionContextKey)
+            throws FrameworkException {
+
+        SessionContext sessionContext = FrameworkUtils.getSessionContextFromCache(request, context, sessionContextKey);
+        if (sessionContext != null && appConfig != null && !appConfig.isSaaSApp()) {
+            /* If the application is non-SaaS, the Service Provider tenant domain must match the user's tenant domain.
+             If there is a mismatch, set the removeCommonAuthCookie attribute in the request to ensure the commonAuthId
+             cookie is cleared by the AuthenticationFrameworkWrapper and remove the cookie from the response. */
+            boolean isMatchingTenantDomain = StringUtils.equals(
+                    sessionContext.getProperty(FrameworkUtils.TENANT_DOMAIN).toString(),
+                    context.getLoginTenantDomain());
+            if (!isMatchingTenantDomain) {
+                request.setAttribute(FrameworkConstants.REMOVE_COMMONAUTH_COOKIE, true);
+                return null;
+            }
+        }
+
+        return sessionContext;
     }
 
     private boolean isDifferent(List<String> newAcrList, List<String> previousAcrList) {
