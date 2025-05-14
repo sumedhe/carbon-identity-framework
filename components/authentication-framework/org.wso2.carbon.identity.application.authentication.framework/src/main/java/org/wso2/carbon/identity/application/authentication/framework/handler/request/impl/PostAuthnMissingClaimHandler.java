@@ -137,8 +137,7 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
             return flowStatus;
         } else {
             try {
-                if (isOtpVerificationCompleteIfTriggered(context)) {
-                    context.removeProperty(FrameworkConstants.IS_OTP_VERIFICATION_TRIGGERED);
+                if (isOtpVerificationTriggeredAndCompleted(context)) {
                     return PostAuthnHandlerFlowStatus.SUCCESS_COMPLETED;
                 }
                 handlePostAuthenticationForMissingClaimsResponse(request, response, context);
@@ -153,7 +152,7 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
             if (log.isDebugEnabled()) {
                 log.debug("Successfully returning from missing claim handler");
             }
-            if (context.getProperty(FrameworkConstants.IS_OTP_VERIFICATION_TRIGGERED) != null) {
+            if (context.getProperty(FrameworkConstants.OTP_VERIFICATION_PENDING_CLAIM) != null) {
                 return PostAuthnHandlerFlowStatus.INCOMPLETE;
             }
             return PostAuthnHandlerFlowStatus.SUCCESS_COMPLETED;
@@ -455,10 +454,11 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
                 AbstractUserStoreManager userStoreManager = (AbstractUserStoreManager) realm.getUserStoreManager();
 
                 userStoreManager.setUserClaimValuesWithID(user.getUserId(), localIdpClaims, null);
-
+                /* If the `otpVerificationTriggeredClaims` set in the local thread, redirect to OTP verification page
+                 and set relevant properties to the authentication context. */
                 if (IdentityUtil.threadLocalProperties.get()
-                        .get(FrameworkConstants.VERIFICATION_TRIGGERED_CLAIMS) != null) {
-                    addOtpVerificationPendingClaims(context, claims);
+                        .get(FrameworkConstants.CLAIM_FOR_PENDING_OTP_VERIFICATION) != null) {
+                    setOtpVerificationPendingClaimToContext(context, claims);
                     redirectToOtpVerificationPage(response, context);
                 }
             } catch (UserStoreException e) {
@@ -526,7 +526,8 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
             throws PostAuthenticationFailedException {
 
         try {
-            context.addEndpointParam(FrameworkConstants.USERNAME, getAuthenticatedUser(context));
+            context.addEndpointParam(
+                    FrameworkConstants.USERNAME, getAuthenticatedUser(context).toFullQualifiedUsername());
             ServiceURLBuilder uriBuilder = ServiceURLBuilder.create();
             uriBuilder = uriBuilder.addPath(FrameworkConstants.VERIFY_ENDPOINT);
             uriBuilder.addParameter(FrameworkConstants.SESSION_DATA_KEY, context.getContextIdentifier());
@@ -537,51 +538,36 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
         }
     }
 
-    private void addOtpVerificationPendingClaims(AuthenticationContext context, Map<String, String> claimValues) {
+    private void setOtpVerificationPendingClaimToContext(AuthenticationContext context, Map<String,
+            String> claimValues) {
 
-        List<String> triggeredClaims = (List<String>) IdentityUtil.threadLocalProperties.get()
-                .remove(FrameworkConstants.VERIFICATION_TRIGGERED_CLAIMS);
-        Map<String, String> pendingClaims =
-                (Map<String, String>) context.getProperty(FrameworkConstants.OTP_VERIFICATION_PENDING_CLAIMS);
-        if (pendingClaims == null) {
-            pendingClaims = new HashMap<>();
-        }
-
-        // Populate the pending claims with values from the triggered list.
-        for (String claim : triggeredClaims) {
-            if (claimValues.containsKey(claim)) {
-                pendingClaims.put(claim, claimValues.get(claim));
-            }
-        }
-
-        context.setProperty(FrameworkConstants.OTP_VERIFICATION_PENDING_CLAIMS, pendingClaims);
-        context.setProperty(FrameworkConstants.IS_OTP_VERIFICATION_TRIGGERED, true);
+        /* Store the pending claim and its value in the authentication context based the otpVerificationTriggeredClaim.
+         This allows to ensure the value is verified and saved to the user claim. */
+        String triggeredClaim = IdentityUtil.threadLocalProperties.get()
+                .remove(FrameworkConstants.CLAIM_FOR_PENDING_OTP_VERIFICATION).toString();
+        Map<String, String> pendingClaim = new HashMap<>();
+        pendingClaim.put("uri", triggeredClaim);
+        pendingClaim.put("value", claimValues.get(triggeredClaim));
+        context.setProperty(FrameworkConstants.OTP_VERIFICATION_PENDING_CLAIM, pendingClaim);
     }
 
-    private boolean isOtpVerificationCompleteIfTriggered(AuthenticationContext context)
+    private boolean isOtpVerificationTriggeredAndCompleted(AuthenticationContext context)
             throws PostAuthenticationFailedException {
 
-        if (!Boolean.parseBoolean(String.valueOf(context.getProperty(FrameworkConstants.IS_OTP_VERIFICATION_TRIGGERED)))) {
+        Map<String, String> pendingClaim =
+                (Map<String, String>) context.getProperty(FrameworkConstants.OTP_VERIFICATION_PENDING_CLAIM);
+        if (pendingClaim == null) {
             return false;
-        }
-
-        Map<String, String> pendingClaims =
-                (Map<String, String>) context.getProperty(FrameworkConstants.OTP_VERIFICATION_PENDING_CLAIMS);
-        if (pendingClaims == null || pendingClaims.isEmpty()) {
-            return true;
         }
 
         AuthenticatedUser user = getAuthenticatedUser(context);
         try {
             UserRealm realm = getUserRealm(user.getTenantDomain());
             AbstractUserStoreManager userStoreManager = (AbstractUserStoreManager) realm.getUserStoreManager();
-            Map<String, String> storedClaims = userStoreManager.getUserClaimValuesWithID(
-                    user.getUserId(), pendingClaims.keySet().toArray(new String[0]), null
+            String storedClaim = userStoreManager.getUserClaimValueWithID(
+                    user.getUserId(), pendingClaim.get("uri"), null
             );
-
-            pendingClaims.entrySet().removeIf(
-                    entry -> StringUtils.equals(storedClaims.get(entry.getKey()), entry.getValue()));
-            return pendingClaims.isEmpty();
+            return StringUtils.equals(storedClaim, pendingClaim.get("value"));
         } catch (UserStoreException | UserIdNotFoundException e) {
             throw new PostAuthenticationFailedException("Error while handling missing mandatory claims.",
                     "Error occurred while retrieving the user claims", e);
