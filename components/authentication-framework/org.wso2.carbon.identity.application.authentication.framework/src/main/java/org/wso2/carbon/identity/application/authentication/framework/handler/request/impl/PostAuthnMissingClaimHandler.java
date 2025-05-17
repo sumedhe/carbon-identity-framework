@@ -453,6 +453,7 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
                 UserRealm realm = getUserRealm(user.getTenantDomain());
                 AbstractUserStoreManager userStoreManager = (AbstractUserStoreManager) realm.getUserStoreManager();
 
+                IdentityUtil.threadLocalProperties.get().put("isProgressiveProfileVerification", "true");
                 userStoreManager.setUserClaimValuesWithID(user.getUserId(), localIdpClaims, null);
                 /* If the `otpVerificationTriggeredClaims` set in the local thread, redirect to OTP verification page
                  and set relevant properties to the authentication context. */
@@ -526,8 +527,6 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
             throws PostAuthenticationFailedException {
 
         try {
-            context.addEndpointParam(
-                    FrameworkConstants.USERNAME, getAuthenticatedUser(context).toFullQualifiedUsername());
             ServiceURLBuilder uriBuilder = ServiceURLBuilder.create();
             uriBuilder = uriBuilder.addPath(FrameworkConstants.VERIFY_ENDPOINT);
             uriBuilder.addParameter(FrameworkConstants.SESSION_DATA_KEY, context.getContextIdentifier());
@@ -545,6 +544,15 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
          This allows to ensure the value is verified and saved to the user claim. */
         String triggeredClaim = IdentityUtil.threadLocalProperties.get()
                 .remove(FrameworkConstants.CLAIM_FOR_PENDING_OTP_VERIFICATION).toString();
+
+        String recoveryScenario = "PROGRESSIVE_PROFILE_MOBILE_VERIFICATION_ON_UPDATE";
+        if (FrameworkConstants.VERIFIED_MOBILE_NUMBERS_CLAIM.equals(triggeredClaim)) {
+            recoveryScenario = "PROGRESSIVE_PROFILE_MOBILE_VERIFICATION_ON_VERIFIED_LIST_UPDATE";
+        }
+        context.addEndpointParam("recoveryScenario", recoveryScenario);
+        context.addEndpointParam(
+                FrameworkConstants.USERNAME, getAuthenticatedUser(context).toFullQualifiedUsername());
+
         Map<String, String> pendingClaim = new HashMap<>();
         pendingClaim.put("uri", triggeredClaim);
         pendingClaim.put("value", claimValues.get(triggeredClaim));
