@@ -518,6 +518,48 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
         return user;
     }
 
+    private AuthenticatedUser getAssociatedAuthenticatedUser(AuthenticationContext context)
+            throws PostAuthenticationFailedException {
+
+        AuthenticatedUser user = context.getSequenceConfig().getAuthenticatedUser();
+        for (Map.Entry<Integer, StepConfig> entry : context.getSequenceConfig().getStepMap().entrySet()) {
+            StepConfig stepConfig = entry.getValue();
+            if (stepConfig.isSubjectAttributeStep()) {
+
+                if (stepConfig.getAuthenticatedUser() != null) {
+                    user = stepConfig.getAuthenticatedUser();
+                }
+
+                if (!user.isFederatedUser()) {
+                    return user;
+                } else {
+                    String associatedID;
+                    String subject = user.getAuthenticatedSubjectIdentifier();
+                    try {
+                        FederatedAssociationManager federatedAssociationManager = FrameworkUtils
+                                .getFederatedAssociationManager();
+                        associatedID = federatedAssociationManager.getUserForFederatedAssociation(context
+                                .getTenantDomain(), stepConfig.getAuthenticatedIdP(), subject);
+                        if (StringUtils.isNotBlank(associatedID)) {
+                            String fullQualifiedAssociatedUserId = FrameworkUtils.prependUserStoreDomainToName(
+                                    associatedID + UserCoreConstants.TENANT_DOMAIN_COMBINER
+                                            + context.getTenantDomain());
+                            UserCoreUtil.setDomainInThreadLocal(UserCoreUtil.extractDomainFromName(associatedID));
+                            user = AuthenticatedUser.createLocalAuthenticatedUserFromSubjectIdentifier(
+                                    fullQualifiedAssociatedUserId);
+                            return user;
+                        }
+                    } catch (FederatedAssociationManagerException | FrameworkException e) {
+                        throw new PostAuthenticationFailedException("Error while handling missing mandatory claims. " +
+                                "Error in association.", "Error while getting association for " + subject, e);
+                    }
+                }
+                break;
+            }
+        }
+        return user;
+    }
+
     private ClaimMetadataManagementService getClaimMetadataManagementService() {
 
         return FrameworkServiceDataHolder.getInstance().getClaimMetadataManagementService();
@@ -538,7 +580,7 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
     }
 
     private void setOtpVerificationPendingClaimToContext(AuthenticationContext context, Map<String,
-            String> claimValues) {
+            String> claimValues) throws PostAuthenticationFailedException {
 
         /* Store the pending claim and its value in the authentication context based the otpVerificationTriggeredClaim.
          This allows to ensure the value is verified and saved to the user claim. */
@@ -551,7 +593,7 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
         }
         context.addEndpointParam("recoveryScenario", recoveryScenario);
         context.addEndpointParam(
-                FrameworkConstants.USERNAME, getAuthenticatedUser(context).toFullQualifiedUsername());
+                FrameworkConstants.USERNAME, getAssociatedAuthenticatedUser(context).toFullQualifiedUsername());
 
         Map<String, String> pendingClaim = new HashMap<>();
         pendingClaim.put("uri", triggeredClaim);
@@ -568,7 +610,7 @@ public class PostAuthnMissingClaimHandler extends AbstractPostAuthnHandler {
             return false;
         }
 
-        AuthenticatedUser user = getAuthenticatedUser(context);
+        AuthenticatedUser user = getAssociatedAuthenticatedUser(context);
         try {
             UserRealm realm = getUserRealm(user.getTenantDomain());
             AbstractUserStoreManager userStoreManager = (AbstractUserStoreManager) realm.getUserStoreManager();
