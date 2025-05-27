@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.identity.claim.metadata.mgt.dao;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.claim.metadata.mgt.exception.ClaimMetadataClientException;
@@ -29,10 +30,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants.ErrorMessage.ERROR_CODE_MAPPED_TO_INVALID_LOCAL_CLAIM_URI;
+import static org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants.SUB_ATTRIBUTES_PROPERTY;
+import static org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants.SUB_ATTRIBUTE_PREFIX;
 
 /**
  *
@@ -185,11 +189,23 @@ public class ClaimDAO {
             prepStmt.setInt(2, tenantId);
 
             try (ResultSet rs = prepStmt.executeQuery()) {
+                ArrayList<String> subAttributes = new ArrayList<>();
                 while (rs.next()) {
                     String claimPropertyName = rs.getString(SQLConstants.PROPERTY_NAME_COLUMN);
                     String claimPropertyValue = rs.getString(SQLConstants.PROPERTY_VALUE_COLUMN);
+                    // Check if the property is a sub attribute, if so, add it to the sub attributes list and skip
+                    // adding the single property to the map.
+                    if (claimPropertyName.startsWith(SUB_ATTRIBUTE_PREFIX)) {
+                        subAttributes.add(claimPropertyValue);
+                        continue;
+                    }
 
                     claimProperties.put(claimPropertyName, claimPropertyValue);
+                }
+                // If there are sub attributes, add them as a single property. All the sub attributes are separated by
+                // a space.
+                if (!subAttributes.isEmpty()) {
+                    claimProperties.put(SUB_ATTRIBUTES_PROPERTY, StringUtils.join(subAttributes, " "));
                 }
             }
         } catch (SQLException e) {
@@ -206,6 +222,19 @@ public class ClaimDAO {
             String query = SQLConstants.ADD_CLAIM_PROPERTY;
             try (PreparedStatement prepStmt = connection.prepareStatement(query);) {
                 for (Map.Entry<String, String> property : claimProperties.entrySet()) {
+                    if (StringUtils.equals(property.getKey(), SUB_ATTRIBUTES_PROPERTY)) {
+                        String[] subAttributes = property.getValue().split(" ");
+                        int i = 0;
+                        for (String subAttribute : subAttributes) {
+                            i++;
+                            prepStmt.setInt(1, claimId);
+                            prepStmt.setString(2, SUB_ATTRIBUTE_PREFIX + i);
+                            prepStmt.setString(3, subAttribute);
+                            prepStmt.setInt(4, tenantId);
+                            prepStmt.addBatch();
+                        }
+                        continue;
+                    }
                     prepStmt.setInt(1, claimId);
                     prepStmt.setString(2, property.getKey());
                     prepStmt.setString(3, property.getValue());

@@ -37,13 +37,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants.SUB_ATTRIBUTES_PROPERTY;
+import static org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants.SUB_ATTRIBUTE_PREFIX;
+
 /**
  * Data access object for org.wso2.carbon.identity.claim.metadata.mgt.model.LocalClaim.
  */
 public class LocalClaimDAO extends ClaimDAO {
 
     private static final Log log = LogFactory.getLog(LocalClaimDAO.class);
-
 
     public List<LocalClaim> getLocalClaims(int tenantId) throws ClaimMetadataException {
 
@@ -143,7 +145,19 @@ public class LocalClaimDAO extends ClaimDAO {
                     existingAttributeMap = new HashMap<>();
                 }
 
+            // If the property is a sub-attribute, we need to append it to the existing property value.
+            if (propertyName.startsWith(SUB_ATTRIBUTE_PREFIX)) {
+                String subAttributes = existingAttributeMap.get(SUB_ATTRIBUTES_PROPERTY);
+                if (subAttributes == null) {
+                    subAttributes = "";
+                } else {
+                    subAttributes += " ";
+                }
+                subAttributes += propertyValue;
+                existingAttributeMap.put(SUB_ATTRIBUTES_PROPERTY, subAttributes);
+            } else {
                 existingAttributeMap.put(propertyName, propertyValue);
+            }
                 claimPropertyMap.put(localClaimId, existingAttributeMap);
             }
         } catch (SQLException e) {

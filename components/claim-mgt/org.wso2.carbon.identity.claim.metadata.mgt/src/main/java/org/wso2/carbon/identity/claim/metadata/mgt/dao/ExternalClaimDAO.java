@@ -34,6 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants.SUB_ATTRIBUTES_PROPERTY;
+import static org.wso2.carbon.identity.claim.metadata.mgt.util.ClaimConstants.SUB_ATTRIBUTE_PREFIX;
+
 /**
  *
  * Data access object for org.wso2.carbon.identity.claim.metadata.mgt.model.ExternalClaim
@@ -311,11 +314,24 @@ public class ExternalClaimDAO extends ClaimDAO {
                     String claimURI = rs.getString(SQLConstants.CLAIM_URI_COLUMN);
                     propmap = new HashMap<>();
                     if (claimPropertyName != null) {
+                        if (claimPropertyName.startsWith(SUB_ATTRIBUTE_PREFIX)) {
+                            claimPropertyName = SUB_ATTRIBUTES_PROPERTY;
+                        }
                         propmap.put(claimPropertyName, claimPropertyValue);
                     }
                     ExternalClaim temp = new ExternalClaim(claimDialectURI, claimURI, mappedURI, propmap);
                     claimMap.put(localId, temp);
                 } else {
+                    if (claimPropertyName.startsWith(SUB_ATTRIBUTE_PREFIX)) {
+                        String subAttributes = claimMap.get(localId).getClaimProperties().get(SUB_ATTRIBUTES_PROPERTY);
+                        if (subAttributes == null) {
+                            subAttributes = "";
+                        } else {
+                            subAttributes += " ";
+                        }
+                        claimPropertyValue = subAttributes + claimPropertyValue;
+                        claimPropertyName = SUB_ATTRIBUTES_PROPERTY;
+                    }
                     claimMap.get(localId).getClaimProperties().put(claimPropertyName, claimPropertyValue);
                 }
             }
