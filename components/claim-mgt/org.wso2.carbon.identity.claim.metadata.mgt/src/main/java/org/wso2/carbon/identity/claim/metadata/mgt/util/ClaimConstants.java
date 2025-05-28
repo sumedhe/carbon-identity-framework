@@ -58,7 +58,7 @@ public class ClaimConstants {
             "ExternalClaimAdditionNotAllowedForDialect";
     public static final String MULTI_VALUED_PROPERTY = "multiValued";
     public static final String SUB_ATTRIBUTES_PROPERTY = "subAttributes";
-    public static final String SUB_ATTRIBUTE_PREFIX = "SubAttribute.attr";
+    public static final String SUB_ATTRIBUTE_PREFIX = "subAttribute.";
 
     /**
      * Enum for error messages.
