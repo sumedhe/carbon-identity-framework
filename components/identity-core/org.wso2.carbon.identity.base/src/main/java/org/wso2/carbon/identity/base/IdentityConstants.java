@@ -318,7 +318,7 @@ public class IdentityConstants {
 
         public static final String ADAPTIVE_AUTH_ALLOW_LOOPS = "AdaptiveAuth.AllowLoops";
 
-        public static final String IDENTIFIER_AS_USERNAME = "LoginIdentifiers.IdentifierAsUsername";
+        public static final String IDENTIFIER_AS_USERNAME = "LoginIdentifiers.enableIdentifierAsDisplayUsername";
     }
 
     /**

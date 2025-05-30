@@ -1143,10 +1143,13 @@
         </AskPassword>
     </TenantRegistrationVerification>
 
-    <!--<LoginIdentifiers>
+    <LoginIdentifiers>
         <Enable>false</Enable>
         <PrimaryLoginIdentifier>http://wso2.org/claims/userType</PrimaryLoginIdentifier>
-    </LoginIdentifiers>-->
+        <!--This config will be used to set the username value as login identifier value which will be used in next
+        steps for displaying purposes.-->
+         <enableIdentifierAsDisplayUsername>{{identity_mgt.login_identifiers.enable_identifier_as_display_username}}</enableIdentifierAsDisplayUsername>
+    </LoginIdentifiers>
 
     <UserClaimUpdate>
         <Claim uri = "http://wso2.org/claims/emailaddress">
