@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.wso2.carbon.identity.framework</groupId>
         <artifactId>certificate-management-feature</artifactId>
-        <version>7.8.23.31</version>
+        <version>7.8.23.32-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
