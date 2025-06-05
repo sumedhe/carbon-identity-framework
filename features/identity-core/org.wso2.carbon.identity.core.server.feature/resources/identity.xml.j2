@@ -1664,9 +1664,6 @@
                 <emailLink>
                     <Enable>{{identity_mgt.password_reset_email.enable_email_link}}</Enable>
                 </emailLink>
-                <smsOtp>
-                    <Enable>{{identity_mgt.password_reset_email.enable_sms_otp}}</Enable>
-                </smsOtp>
                 <ExpiryTime>
                     <smsOtp>{{identity_mgt.password_reset_sms.sms_otp_validity}}</smsOtp>
                 </ExpiryTime>
@@ -1680,6 +1677,7 @@
                 </OTP>
                 <smsOtp>
                     <Regex>{{identity_mgt.password_reset_sms.sms_otp_regex}}</Regex>
+                    <Enable>{{identity_mgt.password_reset_sms.enable_sms_otp}}</Enable>
                 </smsOtp>
                 <!-- Email channel specific properties can be added here. -->
                 <Email>
