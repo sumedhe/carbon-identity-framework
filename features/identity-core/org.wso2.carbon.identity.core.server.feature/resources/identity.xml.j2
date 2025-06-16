@@ -1693,6 +1693,9 @@
                     <ConfirmationCodeTolerancePeriod>{{identity_mgt.password_reset_email.confirmation_code_tolerance_period}}</ConfirmationCodeTolerancePeriod>
                 {% endif %}
                 </Email>
+                <Recovery>
+                <ShowLoginIdentifierInAccountLockMessage>{{identity_mgt.password_recovery.show_login_identifier_in_account_lock_message}}</ShowLoginIdentifierInAccountLockMessage>
+                </Recovery>
             </Password>
             <Username>
                 <NonUniqueUsername>{{identity_mgt.username_recovery.non_unique_user.enabled}}</NonUniqueUsername>
