@@ -977,6 +977,11 @@
       "description": "This email notifies the user that the account is locked by due to too many failed login attempts"
     },
     {
+      "id": "YWNjb3VudExvY2tGYWlsZWRBdHRlbXB0VW50aWxBZG1pblVubG9jaw",
+      "displayName": "Account Locked By Failed Attempts Until Admin Unlocks",
+      "description": "This email notifies the user that the account is locked by due to too many failed login attempts until admin unlocks"
+    },
+    {
       "id": "QWNjb3VudEVuYWJsZQ",
       "displayName": "Account Enabled",
       "description": "This email notifies the user that the account is now enabled"
