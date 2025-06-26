@@ -1753,6 +1753,12 @@
         </AutoLogin>
     </Recovery>
 
+    <AccountLock>
+        <EmailTemplate>
+            <AdminUnlockForFailedAttempts>{{account.lock.handler.enable_admin_unlock_email_template_for_failed_attempts}}</AdminUnlockForFailedAttempts>
+        </EmailTemplate>
+    </AccountLock>
+
     <Notification>
         <DefaultNotificationChannel>{{identity_mgt.notification.default_notification_channel}}</DefaultNotificationChannel>
         <ResolveNotificationChannels>
@@ -4571,5 +4577,11 @@
             <BrandingAIResultRequestPath>{{ai_services.branding_ai.result_request_path}}</BrandingAIResultRequestPath>
         </BrandingAI>
     </AIServices>
+
+    <AccountLock>
+        <EmailTemplate>
+            <AdminUnlockForFailedAttempts>{{account.lock.handler.enable_admin_unlock_email_template_for_failed_attempts}}</AdminUnlockForFailedAttempts>
+        </EmailTemplate>
+    </AccountLock>
 
 </Server>
