@@ -1149,7 +1149,7 @@ public class ApplicationMgtUtil {
     }
 
     /**
-     * This method use to replace placeholders with the hostname and port of URLs for the portal apps.
+     * This method is used to replace placeholders with the hostname and port of URLs for the portal apps.
      *
      * @param absoluteUrl                       The URL which need to resolve from placeholders.
      * @param appName                           Application name.
@@ -1158,7 +1158,7 @@ public class ApplicationMgtUtil {
      * @throws URLBuilderException If any error occurs when building absolute public url without path.
      */
     public static String resolveOriginUrlFromPlaceholders(String absoluteUrl, String appName,
-                    Boolean subOrgAppWithBaseURLPlaceholder) throws URLBuilderException {
+                    boolean subOrgAppWithBaseURLPlaceholder) throws URLBuilderException {
 
         if (StringUtils.isEmpty(appName)) {
             return resolveOriginUrlFromPlaceholders(absoluteUrl);
