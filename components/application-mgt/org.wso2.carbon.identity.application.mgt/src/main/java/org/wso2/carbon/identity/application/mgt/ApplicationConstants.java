@@ -101,6 +101,9 @@ public class ApplicationConstants {
     public static final String ONE_BASED_START_INDEX = "ONE_BASED_START_INDEX";
     public static final String END_INDEX = "END_INDEX";
 
+    // Fallback super tenant domain.
+    public static final String SUPER_TENANT = "carbon.super";
+
     // System application config elements
     public static final String SYSTEM_APPLICATIONS_CONFIG_ELEMENT = "SystemApplications";
     public static final String DEFAULT_APPLICATIONS_CONFIG_ELEMENT = "DefaultApplications";

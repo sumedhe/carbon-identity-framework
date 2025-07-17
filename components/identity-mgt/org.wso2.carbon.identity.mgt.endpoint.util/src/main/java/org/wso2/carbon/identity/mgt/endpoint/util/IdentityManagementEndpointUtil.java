@@ -829,7 +829,7 @@ public class IdentityManagementEndpointUtil {
         String serverUrl = IdentityManagementServiceUtil.getInstance().getContextURLFromFile();
         try {
             if (StringUtils.isBlank(serverUrl)) {
-                if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled()) {
+                if (IdentityTenantUtil.shouldUseTenantQualifiedURLs()) {
                     basePath = ServiceURLBuilder.create().addPath(context).setTenant(tenantDomain).build()
                             .getAbsoluteInternalURL();
                     if (basePath != null && basePath.contains(FrameworkConstants.ORGANIZATION_CONTEXT_PREFIX)) {
@@ -841,7 +841,7 @@ public class IdentityManagementEndpointUtil {
                 } else {
                     serverUrl = ServiceURLBuilder.create().build().getAbsoluteInternalURL();
                     if (StringUtils.isNotBlank(tenantDomain) && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
-                            .equalsIgnoreCase(tenantDomain) && isEndpointTenantAware) {
+                            .equalsIgnoreCase(tenantDomain) && isEndpointTenantAware && !isServerURLAlreadyTenanted(tenantDomain)) {
                         basePath = serverUrl + "/t/" + tenantDomain + context;
                     } else {
                         basePath = serverUrl + context;
@@ -849,7 +849,7 @@ public class IdentityManagementEndpointUtil {
                 }
             } else {
                 if (StringUtils.isNotBlank(tenantDomain) && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
-                        .equalsIgnoreCase(tenantDomain) && isEndpointTenantAware) {
+                        .equalsIgnoreCase(tenantDomain) && isEndpointTenantAware && !isServerURLAlreadyTenanted(tenantDomain)) {
                     basePath = serverUrl + "/t/" + tenantDomain + context;
                 } else {
                     basePath = serverUrl + context;
@@ -859,6 +859,19 @@ public class IdentityManagementEndpointUtil {
             throw new ApiException("Error while building url for context: " + context);
         }
         return basePath;
+    }
+
+    /**
+     * Checks if the server URL is already tenant qualified.
+     *
+     * @param tenantDomain Tenant Domain.
+     * @return true if the service URL is tenant qualified.
+     * @throws URLBuilderException URLBuilderException.
+     */
+    private static boolean isServerURLAlreadyTenanted(String tenantDomain) throws URLBuilderException {
+
+        String path = ServiceURLBuilder.create().build().getPath();
+        return StringUtils.isNotBlank(path) && path.startsWith("/t/" + tenantDomain);
     }
 
     /**
