@@ -487,6 +487,7 @@ public class DefaultAuthenticationRequestHandler implements AuthenticationReques
             }
 
             String applicationTenantDomain = getApplicationTenantDomain(context);
+            String sessionKey = UUID.randomUUID().toString();
             // session context may be null when cache expires therefore creating new cookie as well.
             if (sessionContext != null) {
                 analyticsSessionAction = FrameworkConstants.AnalyticsAttributes.SESSION_UPDATE;
@@ -606,7 +607,6 @@ public class DefaultAuthenticationRequestHandler implements AuthenticationReques
                     sessionContext.addProperty(FrameworkConstants.AUTHENTICATION_CONTEXT_PROPERTIES,
                             context.getProperty(FrameworkConstants.AUTHENTICATION_CONTEXT_PROPERTIES));
                 }
-                String sessionKey = UUID.randomUUID().toString();
                 sessionContextKey = DigestUtils.sha256Hex(sessionKey);
                 sessionContext.addProperty(FrameworkConstants.AUTHENTICATED_USER, authenticationResult.getSubject());
                 sessionContext.addProperty(FrameworkUtils.TENANT_DOMAIN, context.getLoginTenantDomain());
@@ -691,6 +691,20 @@ public class DefaultAuthenticationRequestHandler implements AuthenticationReques
             }
             FrameworkUtils.publishSessionEvent(sessionContextKey, request, context, sessionContext, sequenceConfig
                         .getAuthenticatedUser(), analyticsSessionAction);
+            SessionContext cachedSessionContext =
+                    FrameworkUtils.getSessionContextFromCache(sessionContextKey, context.getLoginTenantDomain());
+            if (cachedSessionContext != null) {
+                /*
+                 In a B2B scenario, when the remember me option is set by the user, it needs to be updated in the
+                 root organization session as well. This will be happen from setting the expiry time for the
+                 commonAuthId cookie. Since the commonAuthId cookie is set in a previous step, from here it will
+                 be updated to keep the remember me option in the root organization as well.
+                */
+                if (cachedSessionContext.isRememberMe() && !context.isRememberMe()) {
+                    context.setRememberMe(cachedSessionContext.isRememberMe());
+                    setAuthCookie(request, response, context, sessionKey, applicationTenantDomain);
+                }
+            }
             publishAuthenticationSuccess(request, context, sequenceConfig.getAuthenticatedUser());
         }
 
