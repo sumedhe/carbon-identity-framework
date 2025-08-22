@@ -1779,6 +1779,6 @@
 
   "account.lock.handler.enable_admin_unlock_email_template_for_failed_attempts": false,
 
-  "exclude_user_stores.token_exchange": ["PRIMARY"]
+  "token_exchange.implicit_association.include_primary_when_secondary_present": false
 }
 
