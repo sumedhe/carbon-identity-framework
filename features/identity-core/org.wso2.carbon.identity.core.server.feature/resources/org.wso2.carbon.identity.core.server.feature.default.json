@@ -1777,6 +1777,8 @@
 
   "notification_templates.sms_templates.apply": true,
 
-  "account.lock.handler.enable_admin_unlock_email_template_for_failed_attempts": false
+  "account.lock.handler.enable_admin_unlock_email_template_for_failed_attempts": false,
+
+  "token_exchange.implicit_association.include_primary_when_secondary_present": false
 }
 
