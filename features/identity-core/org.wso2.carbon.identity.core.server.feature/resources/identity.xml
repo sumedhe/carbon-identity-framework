@@ -782,7 +782,7 @@
 
         <EnableRichAuthorizationRequests>false</EnableRichAuthorizationRequests>
         <Callback>
-            <EnforceLiteralCharacters>true</EnforceLiteralCharacters>
+            <EnforceLiteralCharacters>false</EnforceLiteralCharacters>
         </Callback>
     </OAuth>
 
