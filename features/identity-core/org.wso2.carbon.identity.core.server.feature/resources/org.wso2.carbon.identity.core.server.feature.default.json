@@ -1772,7 +1772,7 @@
 
   "oauth.authorize_all_scopes": false,
   "oauth.enable_rich_authorization_requests" : true,
-  "oauth.callback.enforce_literal_characters": true,
+  "oauth.callback.enforce_literal_characters": false,
   "system_applications.system_portals": ["Console", "My Account"],
 
   "notification_templates.sms_templates.apply": true,
