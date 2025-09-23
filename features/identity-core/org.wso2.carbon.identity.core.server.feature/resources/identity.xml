@@ -781,6 +781,9 @@
         </RestrictedQueryParameters>
 
         <EnableRichAuthorizationRequests>false</EnableRichAuthorizationRequests>
+        <Callback>
+            <EnforceLiteralCharacters>true</EnforceLiteralCharacters>
+        </Callback>
     </OAuth>
 
     <RestApiAuthentication>
