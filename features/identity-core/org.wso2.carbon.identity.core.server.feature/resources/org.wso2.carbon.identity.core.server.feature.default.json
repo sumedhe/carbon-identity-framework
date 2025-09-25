@@ -1771,6 +1771,7 @@
   "actions.types.authentication.default_userstore": "PRIMARY",
 
   "oauth.authorize_all_scopes": false,
+  "oauth.authorize_internal_scopes": true,
   "oauth.enable_rich_authorization_requests" : true,
 
   "system_applications.system_portals": ["Console", "My Account"],
