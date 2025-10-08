@@ -1068,8 +1068,8 @@
                         <AllowedSignatureAlgorithm>{{algorithm}}</AllowedSignatureAlgorithm>
                     {% endfor %}
                 </AllowedSignatureAlgorithms>
-                {% if oauth.oidc.fapi.fapi_version is defined %}
-                <FAPIVersion>{{oauth.oidc.fapi.fapi_version}}</FAPIVersion>
+                {% if oauth.oidc.fapi.version is defined %}
+                <FAPIVersion>{{oauth.oidc.fapi.version}}</FAPIVersion>
                 {% endif %}
             </FAPI>
 
