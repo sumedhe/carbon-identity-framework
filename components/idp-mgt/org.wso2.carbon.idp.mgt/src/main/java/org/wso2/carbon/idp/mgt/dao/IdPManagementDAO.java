@@ -129,6 +129,7 @@ public class IdPManagementDAO {
     private final IdPSecretsProcessor idpSecretsProcessorService = new IdPSecretsProcessor();
 
     private static final String OPENID_IDP_ENTITY_ID = "IdPEntityId";
+    private static final String USE_ENTITY_ID_AS_ISSUER = "OAuth.OpenIDConnect.UseEntityIdAsIssuer";
     private static final String ENABLE_SMS_OTP_IF_RECOVERY_NOTIFICATION_ENABLED
             = "OnDemandConfig.OnInitialUse.EnableSMSOTPPasswordRecoveryIfConnectorEnabled";
     private static final String ENABLE_SMS_USERNAME_RECOVERY_IF_CONNECTOR_ENABLED
@@ -2813,8 +2814,16 @@ public class IdPManagementDAO {
         Property idPEntityIdProp;
         // When the tenant qualified urls are enabled, we need to see the oauth2 token endpoint.
         if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled()) {
-            idPEntityIdProp = resolveFedAuthnProperty(oauth2TokenEPUrl, oidcFedAuthn,
-                    OPENID_IDP_ENTITY_ID);
+            if (isUseEntityIDAsIssuerEnabled()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Using the configured entity ID as the issuer in the " + tenantDomain+ " tenant.");
+                }
+                idPEntityIdProp = resolveFedAuthnProperty(getOIDCResidentIdPEntityId(), oidcFedAuthn,
+                        OPENID_IDP_ENTITY_ID);
+            } else {
+                idPEntityIdProp = resolveFedAuthnProperty(oauth2TokenEPUrl, oidcFedAuthn,
+                        OPENID_IDP_ENTITY_ID);
+            }
         } else {
             idPEntityIdProp = resolveFedAuthnProperty(getOIDCResidentIdPEntityId(), oidcFedAuthn, OPENID_IDP_ENTITY_ID);
         }
@@ -3006,6 +3015,12 @@ public class IdPManagementDAO {
         }
         scimProvConn.setProvisioningProperties(propertiesList.toArray(new Property[0]));
         identityProvider.setProvisioningConnectorConfigs(new ProvisioningConnectorConfig[]{scimProvConn});
+    }
+
+    // Check whether config is enabled to configure Entity ID in Resident IDP
+    private boolean isUseEntityIDAsIssuerEnabled() {
+
+        return Boolean.parseBoolean(IdentityUtil.getProperty(USE_ENTITY_ID_AS_ISSUER));
     }
 
     /**
