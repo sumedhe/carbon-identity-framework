@@ -959,6 +959,7 @@
                 Default value for IDTokenIssuerID, is OAuth2TokenEPUrl.
                 If that doesn't satisfy uncomment the following config and explicitly configure the value
             -->
+            <UseEntityIdAsIssuer>{{oauth.oidc.id_token.use_entityid_as_issuer}}</UseEntityIdAsIssuer>
             <IDTokenIssuerID>{{oauth.oidc.id_token.issuer}}</IDTokenIssuerID>
             <IDTokenCustomClaimsCallBackHandler>{{oauth.oidc.extensions.claim_callback_handler}}</IDTokenCustomClaimsCallBackHandler>
             <IDTokenExpiration>{{oauth.oidc.token_validation.id_token_validity}}</IDTokenExpiration>
@@ -1094,11 +1095,6 @@
             <EnableTLSCertificateBoundAccessTokensViaBindingType>{{oauth.oidc.enable_tls_certificate_bound_access_tokens_via_binding_type}}</EnableTLSCertificateBoundAccessTokensViaBindingType>
             <EnableHybridFlowAppLevelValidation>{{oauth.oidc.enable_hybrid_flow_app_level_validation}}</EnableHybridFlowAppLevelValidation>
             <EnableClaimsSeparationForAccessToken>{{oauth.oidc.enable_claims_separation_for_access_tokens}}</EnableClaimsSeparationForAccessToken>
-            {% if oauth.oidc.use_entity_id_as_issuer is defined %}
-            <UseEntityIdAsIssuer>{{oauth.oidc.use_entity_id_as_issuer}}</UseEntityIdAsIssuer>
-            {% else %}
-            <UseEntityIdAsIssuer>false</UseEntityIdAsIssuer>
-            {% endif %}
         </OpenIDConnect>
 
         <!-- OIDCSessionStateManager configuration -->
