@@ -104,6 +104,23 @@ public class APIResourceManagementUtil {
                 List<APIResource> systemAPIs = getSystemAPIs(tenantDomain);
                 for (APIResource systemAPI : systemAPIs) {
                     tempConfigs.remove(systemAPI.getIdentifier());
+                    /* This block handles the case where the Notification Sender Management API already exists in the
+                        database with the updated identifier (api/server/v(.*)/notification-senders). Since it is not
+                        allowed to have two API resources with the same scopes, an error occurs during registration.
+
+                        Related issue: https://github.com/wso2-enterprise/wso2-iam-internal/issues/4247
+
+                       This API name and identifiers are hardcoded because this fallback logic is specifically
+                       required only for this API due to the identifier change.*/
+                    if ((systemAPI.getIdentifier().equals("/api/server/v(.*)/notification-senders") ||
+                            systemAPI.getIdentifier().equals("/o/api/server/v(.*)/notification-senders")) &&
+                                systemAPI.getName().equals("Notification Sender Management API")) {
+                        /* Special case to handle as the identifier of this API resource is changed to a generic format
+                        with the introduction of Notification Sender Management V2 API from update level 22.
+                        Hence, we need to remove this from the tempConfigs if it exists to avoid calling
+                        registerAPIResources method which causes error logs in server startup. */
+                        tempConfigs.remove(systemAPI.getIdentifier().replace("(.*)", "1"));
+                    }
                 }
                 // Register the new system APIs.
                 registerAPIResources(new ArrayList<>(tempConfigs.values()), tenantDomain);
