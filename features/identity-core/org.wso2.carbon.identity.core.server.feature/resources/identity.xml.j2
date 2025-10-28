@@ -959,6 +959,7 @@
                 Default value for IDTokenIssuerID, is OAuth2TokenEPUrl.
                 If that doesn't satisfy uncomment the following config and explicitly configure the value
             -->
+            <UseEntityIdAsIssuer>{{oauth.oidc.id_token.use_entityid_as_issuer}}</UseEntityIdAsIssuer>
             <IDTokenIssuerID>{{oauth.oidc.id_token.issuer}}</IDTokenIssuerID>
             <IDTokenCustomClaimsCallBackHandler>{{oauth.oidc.extensions.claim_callback_handler}}</IDTokenCustomClaimsCallBackHandler>
             <IDTokenExpiration>{{oauth.oidc.token_validation.id_token_validity}}</IDTokenExpiration>
@@ -1068,6 +1069,9 @@
                         <AllowedSignatureAlgorithm>{{algorithm}}</AllowedSignatureAlgorithm>
                     {% endfor %}
                 </AllowedSignatureAlgorithms>
+                {% if oauth.oidc.fapi.version is defined %}
+                <FAPIVersion>{{oauth.oidc.fapi.version}}</FAPIVersion>
+                {% endif %}
             </FAPI>
 
             <SupportedTokenEndpointSigningAlgorithms>
@@ -1347,6 +1351,7 @@
         </RestrictedQueryParameters>
 
         <AuthorizeAllScopes>{{oauth.authorize_all_scopes}}</AuthorizeAllScopes>
+        <AuthorizeInternalScopes>{{oauth.authorize_internal_scopes}}</AuthorizeInternalScopes>
 
         <!--
             When this configuration is enabled, the system supports the features defined in RFC9396,
@@ -1357,6 +1362,13 @@
         <Callback>
            <EnforceLiteralCharacters>{{oauth.callback.enforce_literal_characters}}</EnforceLiteralCharacters>
         </Callback>
+        <!--
+            By enabling this property, the "Internal" prefix will be removed from the mapped roles attribute in the issued JWT tokens.
+            Enable this setting if your applications do not require the Internal prefix when default attribute mapping
+            for http://wso2.org/claims/roles claim is changed.
+            Default value : false
+        -->
+        <RemoveInternalPrefixFromMappedRolesAttributeInToken>{{oauth.remove_internal_prefix_from_mapped_roles_attribute_in_token}}</RemoveInternalPrefixFromMappedRolesAttributeInToken>
     </OAuth>
 
     <RestApiAuthentication>
@@ -1532,6 +1544,9 @@
             -->
             <ComplexMultiValuedAttributeSupportEnabled>{{scim.enable_complex_multivalued_attribute_support}}</ComplexMultiValuedAttributeSupportEnabled>
         </SCIMAuthenticators>
+
+        <!-- Restrict federated users from accessing the endpoint -->
+        <RestrictFederatedUserAccess>{{scim.restrict_federated_user_access}}</RestrictFederatedUserAccess>
     </SCIM>
 
     <SCIM2>
@@ -1937,9 +1952,9 @@
         <!-- Enable support for storing multiple email addresses and mobile numbers per user. -->
         <EnableMultipleEmailsAndMobileNumbers>{{identity_mgt.user_claim_update.enable_multiple_emails_and_mobile_numbers}}</EnableMultipleEmailsAndMobileNumbers>
 
-        <!-- 
+        <!--
             Defines the scope for which claim uniqueness validation should happen, this can be either within userstore
-            or across userstore. This config is already defined in the EventListener with 
+            or across userstore. This config is already defined in the EventListener with
             id="unique_claim_user_operation_event_listener" of type "UserOperationEventListener".
         -->
         <UniquenessValidation>
