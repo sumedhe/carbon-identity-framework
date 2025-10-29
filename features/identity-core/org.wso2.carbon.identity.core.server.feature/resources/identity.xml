@@ -781,6 +781,9 @@
         </RestrictedQueryParameters>
 
         <EnableRichAuthorizationRequests>false</EnableRichAuthorizationRequests>
+        <Callback>
+            <EnforceLiteralCharacters>false</EnforceLiteralCharacters>
+        </Callback>
         <!--
             By enabling this property, the "Internal" prefix will be removed from the mapped roles attribute in the issued JWT tokens.
             Enable this setting if your applications do not require the Internal prefix when default attribute mapping

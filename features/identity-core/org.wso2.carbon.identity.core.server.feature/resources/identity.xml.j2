@@ -1359,6 +1359,9 @@
             Default value : false
         -->
         <EnableRichAuthorizationRequests>{{oauth.enable_rich_authorization_requests}}</EnableRichAuthorizationRequests>
+        <Callback>
+           <EnforceLiteralCharacters>{{oauth.callback.enforce_literal_characters}}</EnforceLiteralCharacters>
+        </Callback>
         <!--
             By enabling this property, the "Internal" prefix will be removed from the mapped roles attribute in the issued JWT tokens.
             Enable this setting if your applications do not require the Internal prefix when default attribute mapping
