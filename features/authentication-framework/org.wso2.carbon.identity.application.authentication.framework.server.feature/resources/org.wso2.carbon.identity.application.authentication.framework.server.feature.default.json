@@ -212,6 +212,7 @@
   "authentication.authenticator.backup_code.parameters.BackupCodeAuthenticationEndpointErrorPage": "authenticationendpoint/backup_code_error.do",
   "authentication.authenticator.backup_code.parameters.redirectToMultiOptionPageOnFailure": false,
   "authentication.authenticator.backup_code.parameters.Tags": "MFA",
+  "authentication.authenticator.totp.parameters.PreventTOTPCodeReuse": false,
 
   "authentication.authenticator.x509_certificate.name": "x509CertificateAuthenticator",
   "authentication.authenticator.x509_certificate.enable": true,
