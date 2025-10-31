@@ -1292,8 +1292,17 @@ public class RoleDAOImpl implements RoleDAO {
         String nameWithoutDomain = UserCoreUtil.removeDomainFromName(userName);
         int tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
         List<String> roleIds = new ArrayList<>();
+
+        boolean isUsernameCaseSensitive = IdentityUtil.isUserStoreInUsernameCaseSensitive(userName, tenantId);
+        String query;
+        if (isUsernameCaseSensitive) {
+            query = GET_ROLE_ID_LIST_OF_USER_SQL;
+        } else {
+            query = GET_ROLE_ID_LIST_OF_USER_SQL_CASE_INSENSITIVE;
+        }
+
         try (Connection connection = IdentityDatabaseUtil.getUserDBConnection(false);
-             NamedPreparedStatement statement = new NamedPreparedStatement(connection, GET_ROLE_ID_LIST_OF_USER_SQL)) {
+             NamedPreparedStatement statement = new NamedPreparedStatement(connection, query)) {
 
             statement.setString(RoleConstants.RoleTableColumns.UM_USER_NAME, nameWithoutDomain);
             statement.setInt(RoleConstants.RoleTableColumns.UM_TENANT_ID, tenantId);
