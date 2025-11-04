@@ -361,12 +361,15 @@ public class ApplicationMgtUtilTest {
         try (MockedStatic<ApplicationManagementServiceComponentHolder> applicationManagementServiceComponentHolder =
                      mockStatic(ApplicationManagementServiceComponentHolder.class);
              MockedStatic<PrivilegedCarbonContext> privilegedCarbonContext = mockStatic(PrivilegedCarbonContext.class);
-             MockedStatic<CarbonContext> carbonContext = mockStatic(CarbonContext.class);) {
+             MockedStatic<CarbonContext> carbonContext = mockStatic(CarbonContext.class);
+             MockedStatic<IdentityTenantUtil> identityTenantUtil = mockStatic(IdentityTenantUtil.class)) {
             applicationManagementServiceComponentHolder.when(
                     ApplicationManagementServiceComponentHolder::getInstance).thenReturn(
                     mockApplicationManagementServiceComponentHolder);
             when(mockApplicationManagementServiceComponentHolder.getApplicationPermissionProvider()).thenReturn(
                     registryBasedApplicationPermissionProvider);
+            identityTenantUtil.when(() -> IdentityTenantUtil.initializeRegistry(anyInt()))
+                    .thenAnswer((Answer<Void>) invocation -> null);
 
             loadPermissions(privilegedCarbonContext, carbonContext);
             Collection permissionNode = mock(Collection.class);
@@ -440,12 +443,15 @@ public class ApplicationMgtUtilTest {
         try (MockedStatic<ApplicationManagementServiceComponentHolder> applicationManagementServiceComponentHolder =
                      mockStatic(ApplicationManagementServiceComponentHolder.class);
              MockedStatic<PrivilegedCarbonContext> privilegedCarbonContext = mockStatic(PrivilegedCarbonContext.class);
-             MockedStatic<CarbonContext> carbonContext = mockStatic(CarbonContext.class);) {
+             MockedStatic<CarbonContext> carbonContext = mockStatic(CarbonContext.class);
+             MockedStatic<IdentityTenantUtil> identityTenantUtil = mockStatic(IdentityTenantUtil.class)) {
             applicationManagementServiceComponentHolder.when(
                     ApplicationManagementServiceComponentHolder::getInstance).thenReturn(
                     mockApplicationManagementServiceComponentHolder);
             when(mockApplicationManagementServiceComponentHolder.getApplicationPermissionProvider()).thenReturn(
                     registryBasedApplicationPermissionProvider);
+            identityTenantUtil.when(() -> IdentityTenantUtil.initializeRegistry(anyInt()))
+                    .thenAnswer((Answer<Void>) invocation -> null);
 
             loadPermissions(privilegedCarbonContext, carbonContext);
             when(mockTenantRegistry.resourceExists(anyString())).thenReturn(FALSE);
