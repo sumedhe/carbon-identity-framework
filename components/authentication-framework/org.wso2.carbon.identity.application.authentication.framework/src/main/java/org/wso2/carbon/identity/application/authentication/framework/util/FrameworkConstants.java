@@ -91,6 +91,7 @@ public abstract class FrameworkConstants {
     public static final String IS_OTP_VERIFICATION_TRIGGERED = "isOtpVerificationTriggered";
     public static final String OTP_VERIFICATION_PENDING_CLAIM = "otpVerificationPendingClaim";
     public static final String CLAIM_FOR_PENDING_OTP_VERIFICATION = "claimForPendingOtpVerification";
+    public static final String ADD_USER_STORE_DOMAIN_TO_GROUPS_CLAIM = "AddUserStoreDomainToGroupClaims";
 
     // This is to support sign-up form to be displayed in the provisioning flow, as when trying to displaying the
     // sign-up form, we validate whether self-sign up is enabled.
