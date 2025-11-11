@@ -165,15 +165,17 @@ public class UniqueClaimUserOperationEventListener extends AbstractIdentityUserO
     }
 
     /**
-     * Processes claims to validate uniqueness and check the password policy.
+     * Processes user claims by checking if they are unique and validating against password reuse policy.
      *
-     * @param username         The username of the user (nullable if not checking duplicates).
-     * @param claims           A map of claim URIs and their values.
-     * @param profile          The user profile (nullable if not checking duplicates).
-     * @param userStoreManager The user store manager handling claims.
-     * @param credential       The user's password.
-     * @param duplicateClaims  A list to collect duplicate claims (used only if checking duplicates).
-     * @throws UserStoreException If a policy violation occurs.
+     * @param username           The username of the user (nullable if not performing duplicate claim check).
+     * @param claims             A map of claim URIs and their respective values to be processed.
+     * @param profile            The profile name associated with the claims (nullable if not performing
+     *                           duplicate check).
+     * @param userStoreManager   The user store manager responsible for user attribute management.
+     * @param credential         The user's password or authentication credential.
+     * @param checkForDuplicates Flag indicating whether to check for duplicate claim values.
+     * @param duplicateClaims    A list to store duplicate claim display names (only used when checking for duplicates).
+     * @throws UserStoreException If a policy violation occurs, such as password reuse as an attribute value.
      */
     private void processClaims(String username, Map<String, String> claims, String profile,
                                UserStoreManager userStoreManager, Object credential, boolean checkForDuplicates,
@@ -432,7 +434,7 @@ public class UniqueClaimUserOperationEventListener extends AbstractIdentityUserO
         for (Claim claim : claims) {
             claimMap.put(claim.getClaimUri(), claim.getValue());
         }
-        checkClaimUniqueness(userName, claimMap, null, userStoreManager, newCredential);
+        validatePasswordNotEqualToClaims(claimMap, userStoreManager, newCredential);
         return true;
     }
 }
