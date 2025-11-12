@@ -1023,7 +1023,7 @@ public class RoleDAOImpl implements RoleDAO {
 
         int mainRoleUMId = 0;
         int sharedRoleUMId = 0;
-        try (Connection connection = IdentityDatabaseUtil.getUserDBConnection(false)) {
+        try (Connection connection = IdentityDatabaseUtil.getUserDBConnection(true)) {
             try (NamedPreparedStatement stmt = new NamedPreparedStatement(connection, GET_ROLE_UM_ID_BY_UUID)) {
                 stmt.setString(RoleConstants.RoleTableColumns.UM_UUID, mainRoleUUID);
                 ResultSet resultSet = stmt.executeQuery();
@@ -1060,7 +1060,9 @@ public class RoleDAOImpl implements RoleDAO {
                 preparedStatement.setInt(RoleConstants.RoleTableColumns.UM_SHARED_ROLE_TENANT_ID, sharedRoleTenantId);
                 preparedStatement.setInt(RoleConstants.RoleTableColumns.UM_MAIN_ROLE_TENANT_ID, mainRoleTenantId);
                 preparedStatement.executeUpdate();
+                IdentityDatabaseUtil.commitUserDBTransaction(connection);
             } catch (SQLException e) {
+                IdentityDatabaseUtil.rollbackUserDBTransaction(connection);
                 String message = "Error while adding the role relationship of role: %s.";
                 throw new IdentityRoleManagementServerException(RoleConstants.Error.UNEXPECTED_SERVER_ERROR.getCode(),
                         String.format(message, sharedRoleName), e);
