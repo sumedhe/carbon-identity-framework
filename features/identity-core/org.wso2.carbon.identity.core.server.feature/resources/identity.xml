@@ -1256,6 +1256,7 @@
         The default value of the configuration is false.
         -->
         <EnableRoleValidation>false</EnableRoleValidation>
+        <EnableCrossTenantAuthorizedApiValidation>false</EnableCrossTenantAuthorizedApiValidation>
     </ApplicationMgt>
 
     <JITProvisioning>
