@@ -2815,4 +2815,5 @@
             <EnableSMSUsernameRecoveryIfConnectorEnabled>false</EnableSMSUsernameRecoveryIfConnectorEnabled>
         </OnInitialUse>
     </OnDemandConfig>
+    <PASTRCookieMaxAge>-1</PASTRCookieMaxAge>
 </Server>
