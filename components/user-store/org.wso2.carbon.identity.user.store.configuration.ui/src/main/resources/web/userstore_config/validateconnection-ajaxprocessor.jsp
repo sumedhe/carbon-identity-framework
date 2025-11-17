@@ -6,6 +6,11 @@
 <%@ page import="org.wso2.carbon.utils.ServerConstants" %>
 <%@ page import="org.owasp.encoder.Encode" %>
 <%
+    if (!"post".equalsIgnoreCase(request.getMethod())) {
+        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        return;
+    }
+
     String domainName = request.getParameter("domainName");
     String driverName = request.getParameter("driverName");
     String connectionURL = request.getParameter("connectionURL");
