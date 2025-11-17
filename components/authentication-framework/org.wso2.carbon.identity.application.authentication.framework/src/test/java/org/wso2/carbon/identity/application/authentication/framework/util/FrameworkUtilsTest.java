@@ -42,7 +42,9 @@ import org.wso2.carbon.identity.application.authentication.framework.cache.Sessi
 import org.wso2.carbon.identity.application.authentication.framework.cache.SessionContextCacheEntry;
 import org.wso2.carbon.identity.application.authentication.framework.cache.SessionContextCacheKey;
 import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
+import org.wso2.carbon.identity.application.authentication.framework.config.model.ApplicationConfig;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.ExternalIdPConfig;
+import org.wso2.carbon.identity.application.authentication.framework.config.model.SequenceConfig;
 import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.context.SessionContext;
 import org.wso2.carbon.identity.application.authentication.framework.exception.FrameworkException;
@@ -75,6 +77,7 @@ import org.wso2.carbon.identity.common.testng.WithCarbonHome;
 import org.wso2.carbon.identity.core.model.IdentityCookieConfig;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
 import org.wso2.carbon.identity.event.services.IdentityEventServiceImpl;
@@ -191,7 +194,7 @@ public class FrameworkUtilsTest extends IdentityBaseTest {
                 new MockAuthenticator("HwkMockAuthenticator"));
         ApplicationAuthenticatorManager.getInstance().addSystemDefinedAuthenticator(
                 new MockAuthenticator("FederatedAuthenticator", null, "sampleClaimDialectURI"));
-           
+
         authenticationContext.setTenantDomain("abc");
     }
 
@@ -387,7 +390,7 @@ public class FrameworkUtilsTest extends IdentityBaseTest {
     public void getAddAuthenticationContextToCache() {
 
         try (MockedStatic<AuthenticationContextCache> authenticationContextCache =
-                mockStatic(AuthenticationContextCache.class)) {
+                     mockStatic(AuthenticationContextCache.class)) {
             authenticationContextCache.when(
                     AuthenticationContextCache::getInstance).thenReturn(mockedAuthenticationContextCache);
             String contextId = "CONTEXT-ID";
@@ -557,11 +560,11 @@ public class FrameworkUtilsTest extends IdentityBaseTest {
     public void testGetAuthenticationResultFromSessionDataStoreExpired() {
 
         try (MockedStatic<SessionDataStore> sessionDataStore = mockStatic(SessionDataStore.class);
-            MockedStatic<IdentityUtil> identityUtil = mockStatic(IdentityUtil.class)) {
+             MockedStatic<IdentityUtil> identityUtil = mockStatic(IdentityUtil.class)) {
 
-                sessionDataStore.when(SessionDataStore::getInstance).thenReturn(mockedSessionDataStore);
-                identityUtil.when(() -> IdentityUtil.getProperty("JDBCPersistenceManager.SessionDataPersist.Temporary"))
-                        .thenReturn("true");
+            sessionDataStore.when(SessionDataStore::getInstance).thenReturn(mockedSessionDataStore);
+            identityUtil.when(() -> IdentityUtil.getProperty("JDBCPersistenceManager.SessionDataPersist.Temporary"))
+                    .thenReturn("true");
 
             AuthenticationResultCache authenticationCacheSpy = spy(AuthenticationResultCache.getInstance());
 
@@ -1151,7 +1154,7 @@ public class FrameworkUtilsTest extends IdentityBaseTest {
 
         Assert.assertNull(FrameworkUtils.getAppAuthenticatorByName("NonExistAuthenticator"));
     }
- 
+
     private void removeAllSystemDefinedAuthenticators() {
 
         List<ApplicationAuthenticator> authenticatorList = new ArrayList<>(
@@ -1159,5 +1162,97 @@ public class FrameworkUtilsTest extends IdentityBaseTest {
         for (ApplicationAuthenticator authenticator : authenticatorList) {
             ApplicationAuthenticatorManager.getInstance().removeSystemDefinedAuthenticator(authenticator);
         }
+    }
+
+    @Test
+    public void testPreprocessUsernameWithContextTenantDomainReturnsOriginalForLegacySaaSApp() {
+
+        AuthenticationContext context = buildAuthenticationContext(true, "app.com", "user.com");
+
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class);
+             MockedStatic<IdentityTenantUtil> identityTenantUtilMock = mockStatic(IdentityTenantUtil.class)) {
+
+            identityUtilMock.when(IdentityUtil::isEmailUsernameEnabled).thenReturn(false);
+            identityTenantUtilMock.when(IdentityTenantUtil::isLegacySaaSAuthenticationEnabled).thenReturn(true);
+            identityTenantUtilMock.when(IdentityTenantUtil::isTenantedSessionsEnabled).thenReturn(true);
+
+            String processedUsername = FrameworkUtils.preprocessUsernameWithContextTenantDomain("alice", context);
+
+            assertEquals(processedUsername, "alice");
+        }
+    }
+
+    @Test
+    public void testPreprocessUsernameWithContextTenantDomainWhenEmailUsernameEnabled() {
+
+        AuthenticationContext context = buildAuthenticationContext(false, "app.com", "user.com");
+
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class);
+             MockedStatic<IdentityTenantUtil> identityTenantUtilMock = mockStatic(IdentityTenantUtil.class)) {
+
+            identityUtilMock.when(IdentityUtil::isEmailUsernameEnabled).thenReturn(true);
+            identityTenantUtilMock.when(IdentityTenantUtil::isLegacySaaSAuthenticationEnabled).thenReturn(false);
+            identityTenantUtilMock.when(IdentityTenantUtil::isTenantedSessionsEnabled).thenReturn(true);
+
+            String processedUsername = FrameworkUtils
+                    .preprocessUsernameWithContextTenantDomain("alice@example.com", context);
+
+            assertEquals(processedUsername, "alice@example.com@user.com");
+        }
+    }
+
+    @Test
+    public void testPreprocessUsernameWithContextTenantDomainAppendsContextTenantForNonSaaS() {
+
+        AuthenticationContext context = buildAuthenticationContext(false, "app.com", "user.com");
+
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class);
+             MockedStatic<IdentityTenantUtil> identityTenantUtilMock = mockStatic(IdentityTenantUtil.class)) {
+
+            identityUtilMock.when(IdentityUtil::isEmailUsernameEnabled).thenReturn(false);
+            identityTenantUtilMock.when(IdentityTenantUtil::isLegacySaaSAuthenticationEnabled).thenReturn(false);
+            identityTenantUtilMock.when(IdentityTenantUtil::isTenantedSessionsEnabled).thenReturn(true);
+
+            String processedUsername = FrameworkUtils
+                    .preprocessUsernameWithContextTenantDomain("alice", context);
+
+            assertEquals(processedUsername, "alice@app.com");
+        }
+    }
+
+    @Test
+    public void testPreprocessUsernameWithContextTenantDomainReturnsOriginalForSaaSEmailUser() {
+
+        AuthenticationContext context = buildAuthenticationContext(true, "app.com", "user.com");
+
+        try (MockedStatic<IdentityUtil> identityUtilMock = mockStatic(IdentityUtil.class);
+             MockedStatic<IdentityTenantUtil> identityTenantUtilMock = mockStatic(IdentityTenantUtil.class)) {
+
+            identityUtilMock.when(IdentityUtil::isEmailUsernameEnabled).thenReturn(false);
+            identityTenantUtilMock.when(IdentityTenantUtil::isLegacySaaSAuthenticationEnabled).thenReturn(false);
+            identityTenantUtilMock.when(IdentityTenantUtil::isTenantedSessionsEnabled).thenReturn(true);
+
+            String processedUsername = FrameworkUtils
+                    .preprocessUsernameWithContextTenantDomain("alice@example.com", context);
+
+            assertEquals(processedUsername, "alice@example.com");
+        }
+    }
+
+    private AuthenticationContext buildAuthenticationContext(boolean isSaaSApp, String tenantDomain,
+                                                             String userTenantDomain) {
+
+        AuthenticationContext context = new AuthenticationContext();
+        context.setTenantDomain(tenantDomain);
+        context.setLoginTenantDomain(userTenantDomain);
+        context.setUserTenantDomainHint(userTenantDomain);
+
+        SequenceConfig sequenceConfig = new SequenceConfig();
+        ApplicationConfig applicationConfig = mock(ApplicationConfig.class);
+        when(applicationConfig.isSaaSApp()).thenReturn(isSaaSApp);
+        sequenceConfig.setApplicationConfig(applicationConfig);
+        context.setSequenceConfig(sequenceConfig);
+
+        return context;
     }
 }
