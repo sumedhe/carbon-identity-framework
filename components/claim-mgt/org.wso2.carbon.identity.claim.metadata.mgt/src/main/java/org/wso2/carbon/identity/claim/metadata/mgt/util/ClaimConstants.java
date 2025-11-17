@@ -41,6 +41,7 @@ public class ClaimConstants {
     public static final String CLAIM_URI_PROPERTY = "ClaimURI";
     public static final String MASKING_REGULAR_EXPRESSION_PROPERTY = "MaskingRegEx";
     public static final String CLAIM_UNIQUENESS_SCOPE_PROPERTY = "UniquenessScope";
+    public static final String MANAGED_IN_USER_STORE_PROPERTY = "ManagedInUserStore";
     public static final String IS_UNIQUE_CLAIM_PROPERTY = "isUnique";
     public static final String PROFILES_CLAIM_PROPERTY_PREFIX = "Profiles.";
     public static final String UNIQUENESS_VALIDATION_SCOPE = "UserClaimUpdate.UniquenessValidation.ScopeWithinUserstore";
@@ -50,6 +51,7 @@ public class ClaimConstants {
     public static final String DEFAULT_ATTRIBUTE = "DefaultAttribute";
     public static final String MAPPED_LOCAL_CLAIM_PROPERTY = "MappedLocalClaim";
     public static final String EXCLUDED_USER_STORES_PROPERTY = "ExcludedUserStores";
+    public static final String COMMA_SEPARATOR = ",";
     public static final String MIN_LENGTH = "minLength";
     public static final String MAX_LENGTH = "maxLength";
     public static final String IS_SYSTEM_CLAIM = "isSystemClaim";
@@ -119,12 +121,18 @@ public class ClaimConstants {
         ERROR_CODE_INVALID_ATTRIBUTE_PROFILE("CMT-600015", "Invalid attribute profile name."),
         ERROR_CODE_CANNOT_ADD_TO_EXTERNAL_DIALECT("CMT-60016",
                 "Adding claims to dialect %s is not allowed"),
+        ERROR_CODE_CANNOT_EXCLUDE_USER_STORE("CMT-60018",
+                "User store '%s' cannot be excluded because it is configured to manage claims."),
+        ERROR_CODE_CLAIM_MUST_BE_MANAGED_IN_USER_STORE("CMT-60019",
+                "Claim '%s' must be managed in user store."),
 
         // Server Errors
         ERROR_CODE_DELETE_IDN_CLAIM_MAPPED_ATTRIBUTE("65001", "Error occurred while deleting claim " +
                 "mapped attributes for domain : %s with tenant Id : %s from table : IDN_CLAIM_MAPPED_ATTRIBUTE"),
         ERROR_CODE_SERVER_ERROR_DELETING_CLAIM_MAPPINGS("65001", "Error occurred while deleting the " +
-                "claim mapping for the tenant : %s with domain : %s");
+                "claim mapping for the tenant : %s with domain : %s"),
+        ERROR_CODE_SERVER_ERROR_GETTING_USER_STORE_MANAGER("65007", "Server error occurred while " +
+                "getting user store manager for tenant: %s .");
 
         private final String code;
         private final String message;
