@@ -1147,12 +1147,9 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
 
             if (cause instanceof SQLException) {
                 SQLException sqlEx = (SQLException) cause;
-                String sqlState = sqlEx.getSQLState();
-
                 // PostgreSQL unique constraint violation: SQLState 23505
-                if (sqlState != null && SQLConstants.POSTGRESQL_UNIQUE_CONSTRAINT_VIOLATION_ERROR_CODE.equals(sqlState)) {
-                    throw handleClientException(ERROR_CODE_RESOURCE_ALREADY_EXISTS,
-                                resource.getResourceName(), e);
+                if (SQLConstants.POSTGRESQL_UNIQUE_CONSTRAINT_VIOLATION_ERROR_CODE.equals(sqlEx.getSQLState())) {
+                    throw handleClientException(ERROR_CODE_RESOURCE_ALREADY_EXISTS, resource.getResourceName(), e);
                 }
             }
 
