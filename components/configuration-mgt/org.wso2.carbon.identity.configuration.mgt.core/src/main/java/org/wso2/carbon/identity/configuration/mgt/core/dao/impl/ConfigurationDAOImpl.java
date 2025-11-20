@@ -1138,11 +1138,22 @@ public class ConfigurationDAOImpl implements ConfigurationDAO {
                 preparedStatement.setString(++initialParameterIndex, resource.getResourceId());
             });
         } catch (DataAccessException e) {
-            if (e.getCause() instanceof SQLIntegrityConstraintViolationException) {
-                throw handleClientException(ERROR_CODE_RESOURCE_ALREADY_EXISTS, resource.getResourceName(), e);
-            } else {
-                throw e;
+            Throwable cause = e.getCause();
+            if (cause instanceof SQLException) {
+                SQLException sqlEx = (SQLException) cause;
+                String sqlState = sqlEx.getSQLState();
+
+                // Check for unique constraint violations across databases
+                // 23505 - PostgreSQL, 23000 - MySQL, 00001 - Oracle
+                if (sqlState != null && (sqlState.startsWith("23") || "00001".equals(sqlState))) {
+                    if (cause instanceof SQLIntegrityConstraintViolationException ||
+                            sqlState.equals("23505") || sqlState.equals("23000")) {
+                        throw handleClientException(ERROR_CODE_RESOURCE_ALREADY_EXISTS,
+                                resource.getResourceName(), e);
+                    }
+                }
             }
+            throw e;
         }
     }
 
