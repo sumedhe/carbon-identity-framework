@@ -2199,4 +2199,22 @@ public class IdentityUtil {
 
         return signWithTenantKey(data, tenantDomain, null);
     }
+
+    /**
+     * Escapes SQL LIKE wildcard characters (underscore) in user input.
+     * This method prevents the underscore character (_) from being treated as a single-character wildcard.
+     *
+     * @param value The user input value to escape.
+     * @return The escaped value with underscore wildcards escaped using backslash.
+     */
+    public static String escapeSqlLikeWildcards(String value) {
+
+        if (StringUtils.isBlank(value)) {
+            return value;
+        }
+        // Escape backslash first to avoid double-escaping.
+        String escaped = value.replace("\\", "\\\\");
+        escaped = escaped.replace("_", "\\_");
+        return escaped;
+    }
 }
