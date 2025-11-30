@@ -115,6 +115,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import static org.wso2.carbon.identity.core.util.IdentityCoreConstants.ALPHABET;
 import static org.wso2.carbon.identity.core.util.IdentityCoreConstants.ENCODED_ZERO;
 import static org.wso2.carbon.identity.core.util.IdentityCoreConstants.INDEXES;
+import static org.wso2.carbon.identity.core.util.IdentityCoreConstants.TREAT_UNDERSCORE_AS_WILDCARD;
 import static org.wso2.carbon.identity.core.util.IdentityCoreConstants.USERS_LIST_PER_ROLE_LOWER_BOUND;
 import static org.wso2.carbon.identity.core.util.IdentityKeyStoreResolverConstants.ErrorMessages.ERROR_RETRIEVING_TENANT_CONTEXT_PUBLIC_CERTIFICATE_KEYSTORE_NOT_EXIST;
 
@@ -2209,7 +2210,8 @@ public class IdentityUtil {
      */
     public static String escapeSqlLikeWildcards(String value) {
 
-        if (StringUtils.isBlank(value)) {
+        boolean treatUnderscoreAsWildcard = Boolean.parseBoolean(getProperty(TREAT_UNDERSCORE_AS_WILDCARD));
+        if (treatUnderscoreAsWildcard || StringUtils.isBlank(value)) {
             return value;
         }
         // Escape backslash first to avoid double-escaping.
