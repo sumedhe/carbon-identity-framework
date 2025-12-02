@@ -228,8 +228,8 @@ public class SecretManagerImpl implements SecretManager {
     @Override
     public SecretType addSecretType(SecretType secretType) throws SecretManagementException {
 
-        String disableSecretTypeEndpoint = getSecretTypeEndpointConfig();
-        if (Boolean.parseBoolean(disableSecretTypeEndpoint)) {
+        String enableSecretTypeEndpoint = getSecretTypeEndpointConfig();
+        if (!Boolean.parseBoolean(enableSecretTypeEndpoint)) {
             throw new SecretManagementClientException(
                     SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getCode(),
                     SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getMessage());
@@ -253,8 +253,8 @@ public class SecretManagerImpl implements SecretManager {
     @Override
     public SecretType replaceSecretType(SecretType secretType) throws SecretManagementException {
 
-        String disableSecretTypeEndpoint = getSecretTypeEndpointConfig();
-        if (Boolean.parseBoolean(disableSecretTypeEndpoint)) {
+        String enableSecretTypeEndpoint = getSecretTypeEndpointConfig();
+        if (!Boolean.parseBoolean(enableSecretTypeEndpoint)) {
             throw new SecretManagementClientException(
                     SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getCode(),
                     SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getMessage());
@@ -278,8 +278,8 @@ public class SecretManagerImpl implements SecretManager {
     @Override
     public SecretType getSecretType(String secretTypeName) throws SecretManagementException {
 
-        String disableSecretTypeEndpoint = getSecretTypeEndpointConfig();
-        if (Boolean.parseBoolean(disableSecretTypeEndpoint)) {
+        String enableSecretTypeEndpoint = getSecretTypeEndpointConfig();
+        if (!Boolean.parseBoolean(enableSecretTypeEndpoint)) {
             throw new SecretManagementClientException(
                     SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getCode(),
                     SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getMessage());
@@ -301,8 +301,8 @@ public class SecretManagerImpl implements SecretManager {
     @Override
     public void deleteSecretType(String secretTypeName) throws SecretManagementException {
 
-        String disableSecretTypeEndpoint = getSecretTypeEndpointConfig();
-        if (Boolean.parseBoolean(disableSecretTypeEndpoint)) {
+        String enableSecretTypeEndpoint = getSecretTypeEndpointConfig();
+        if (!Boolean.parseBoolean(enableSecretTypeEndpoint)) {
             throw new SecretManagementClientException(
                     SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getCode(),
                     SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getMessage());
@@ -631,6 +631,6 @@ public class SecretManagerImpl implements SecretManager {
     private static String getSecretTypeEndpointConfig() {
 
         return IdentityUtil.getProperty(IdentityConstants.ServerConfig.
-                DISABLE_SECRET_TYPE_ENDPOINT);
+                ENABLE_SECRET_TYPE_ENDPOINT);
     }
 }

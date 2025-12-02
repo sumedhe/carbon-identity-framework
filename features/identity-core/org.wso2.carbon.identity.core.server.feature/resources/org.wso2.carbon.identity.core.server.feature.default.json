@@ -1789,6 +1789,6 @@
 
   "token_exchange.implicit_association.include_primary_when_secondary_present": false,
 
-  "secret_type_endpoint.disable" : true
+  "secret_type_endpoint.enable" : false
 }
 

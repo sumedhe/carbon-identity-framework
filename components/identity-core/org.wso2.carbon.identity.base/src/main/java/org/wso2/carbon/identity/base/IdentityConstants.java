@@ -320,7 +320,7 @@ public class IdentityConstants {
 
         public static final String IDENTIFIER_AS_USERNAME = "LoginIdentifiers.enableIdentifierAsDisplayUsername";
 
-        public static final String DISABLE_SECRET_TYPE_ENDPOINT = "DisableSecretTypeEndpoint";
+        public static final String ENABLE_SECRET_TYPE_ENDPOINT = "EnableSecretTypeEndpoint";
     }
 
     /**
