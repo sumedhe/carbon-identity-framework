@@ -128,7 +128,7 @@ public class FilterQueriesUtil {
                 .isNotBlank(operation)) {
             // Escape SQL wildcards for operations that use LIKE clause.
             if (operation.equals(SW) || operation.equals(EW) || operation.equals(CO)) {
-                value = IdentityUtil.escapeSqlLikeWildcards(value);
+                value = IdentityUtil.processSingleCharWildcard(value);
             }
             switch (operation) {
                 case EQ: {

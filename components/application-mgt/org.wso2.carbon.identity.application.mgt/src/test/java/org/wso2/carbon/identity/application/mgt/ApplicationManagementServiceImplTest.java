@@ -581,7 +581,7 @@ public class ApplicationManagementServiceImplTest {
             List<String> systemApp = Arrays.asList(APPLICATION_NAME_3);
             identityUtil.when(() -> IdentityUtil.getPropertyAsList(PORTAL_NAMES_CONFIG_ELEMENT))
                     .thenReturn(systemApp);
-            identityUtil.when(() -> IdentityUtil.escapeSqlLikeWildcards(anyString())).thenReturn(filterValue);
+            identityUtil.when(() -> IdentityUtil.processSingleCharWildcard(anyString())).thenReturn(filterValue);
             ApplicationBasicInfo[] applicationBasicInfo = applicationManagementService.getApplicationBasicInfo
                     (SUPER_TENANT_DOMAIN_NAME, USERNAME_1, filter, 0, 10, true);
             Assert.assertEquals(applicationBasicInfo.length, expectedResult);
@@ -617,7 +617,7 @@ public class ApplicationManagementServiceImplTest {
             List<String> systemApp = Arrays.asList(APPLICATION_NAME_3);
             identityUtil.when(() -> IdentityUtil.getPropertyAsList(PORTAL_NAMES_CONFIG_ELEMENT))
                     .thenReturn(systemApp);
-            identityUtil.when(() -> IdentityUtil.escapeSqlLikeWildcards(anyString())).thenReturn(filterValue);
+            identityUtil.when(() -> IdentityUtil.processSingleCharWildcard(anyString())).thenReturn(filterValue);
             Assert.assertEquals(
                     applicationManagementService.getCountOfApplications(SUPER_TENANT_DOMAIN_NAME, USERNAME_1,
                             filter, true), expectedResult);

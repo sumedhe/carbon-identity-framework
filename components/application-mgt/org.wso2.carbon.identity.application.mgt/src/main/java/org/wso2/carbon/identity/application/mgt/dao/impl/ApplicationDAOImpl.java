@@ -3994,7 +3994,7 @@ public class ApplicationDAOImpl extends AbstractApplicationDAOImpl implements Pa
         // Escape SQL wildcards for operations that use LIKE clause.
         if (FILTER_STARTS_WITH.equals(searchOperation) || FILTER_ENDS_WITH.equals(searchOperation) ||
                 FILTER_CONTAINS.equals(searchOperation)) {
-            formattedFilterValue = IdentityUtil.escapeSqlLikeWildcards(formattedFilterValue);
+            formattedFilterValue = IdentityUtil.processSingleCharWildcard(formattedFilterValue);
         }
         return formattedFilterValue;
     }
