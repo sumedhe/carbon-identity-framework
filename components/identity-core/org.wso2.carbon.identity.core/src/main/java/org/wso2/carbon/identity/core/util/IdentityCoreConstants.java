@@ -33,6 +33,8 @@ public class IdentityCoreConstants {
     public static final String RECOVERY_ENDPOINT_PATH = "RecoveryEndpoint.Path";
     public static final String FILE_NAME_REGEX = "FileNameRegEx";
     public static final String PORTS_OFFSET = "Ports.Offset";
+    public static final String UNDERSCORE = "_";
+    public static final String SINGLE_CHARACTER_WILDCARD = "APIFiltering.SingleCharacterWildcard";
 
     public static final String TENANT_NAME_FROM_CONTEXT = "TenantNameFromContext";
     public static final String ENABLE_TENANT_QUALIFIED_URLS = "TenantContext.TenantQualifiedUrls.Enable";
