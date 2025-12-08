@@ -22,7 +22,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.authentication.framework.ApplicationAuthenticator;
 import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.ExternalIdPConfig;
@@ -162,7 +161,7 @@ public abstract class JsClaims extends AbstractJSContextMemberObject implements 
 
     public Object getMember(String claimUri) {
 
-        if (isAuthenticatedUserInCurrentTenant()) {
+        if (authenticatedUser != null) {
             if (isRemoteClaimRequest) {
                 return getFederatedClaim(claimUri);
             } else {
@@ -174,7 +173,7 @@ public abstract class JsClaims extends AbstractJSContextMemberObject implements 
 
     public boolean hasMember(String claimUri) {
 
-        if (isAuthenticatedUserInCurrentTenant()) {
+        if (authenticatedUser != null) {
             if (isRemoteClaimRequest) {
                 return hasFederatedClaim(claimUri);
             } else {
@@ -186,7 +185,7 @@ public abstract class JsClaims extends AbstractJSContextMemberObject implements 
 
     public boolean setMemberObject(String claimUri, Object claimValue) {
 
-        if (isAuthenticatedUserInCurrentTenant()) {
+        if (authenticatedUser != null) {
             if (isRemoteClaimRequest) {
                 setFederatedClaim(claimUri, String.valueOf(claimValue));
             } else {
@@ -486,11 +485,5 @@ public abstract class JsClaims extends AbstractJSContextMemberObject implements 
             claimValue = StringUtils.EMPTY;
         }
         getContext().addRuntimeClaim(claimUri, String.valueOf(claimValue));
-    }
-
-    private boolean isAuthenticatedUserInCurrentTenant() {
-
-        return authenticatedUser != null && StringUtils.equals(authenticatedUser.getTenantDomain(),
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain());
     }
 }
