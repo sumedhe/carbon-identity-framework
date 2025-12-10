@@ -28,8 +28,10 @@ import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.secret.mgt.core.dao.SecretDAO;
 import org.wso2.carbon.identity.secret.mgt.core.dao.impl.SecretDAOImpl;
 import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementClientException;
@@ -109,6 +111,10 @@ public class SecretManagerTest {
         cryptoUtil = mockStatic(CryptoUtil.class);
         this.mockCryptoUtil = mock(CryptoUtil.class);
         cryptoUtil.when(CryptoUtil::getDefaultCryptoUtil).thenReturn(this.mockCryptoUtil);
+
+        mockStatic(IdentityUtil.class);
+        when(IdentityUtil.getProperty(IdentityConstants.ServerConfig.
+                ENABLE_SECRET_TYPE_ENDPOINT)).thenReturn("true");
     }
 
     @AfterMethod
