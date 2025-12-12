@@ -3232,8 +3232,7 @@ public class IdPManagementDAO {
                         }
                         federatedIdp = idpSecretsProcessorService.decryptAssociatedSecrets(federatedIdp);
                     } finally {
-                        if (!StringUtils.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME,
-                                PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain())) {
+                        if (!StringUtils.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, tenantDomain)) {
                             PrivilegedCarbonContext.endTenantFlow();
                         }
 
