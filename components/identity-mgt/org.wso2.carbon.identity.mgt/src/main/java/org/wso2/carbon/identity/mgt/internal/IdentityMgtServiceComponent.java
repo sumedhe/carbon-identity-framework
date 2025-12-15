@@ -42,6 +42,8 @@ import org.wso2.carbon.identity.mgt.IdentityMgtConfigException;
 import org.wso2.carbon.identity.mgt.IdentityMgtEventListener;
 import org.wso2.carbon.identity.mgt.RecoveryProcessor;
 import org.wso2.carbon.identity.mgt.config.Config;
+import org.wso2.carbon.identity.mgt.listener.TenantSyncListener;
+import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.mgt.config.ConfigBuilder;
 import org.wso2.carbon.identity.mgt.config.EmailNotificationConfig;
 import org.wso2.carbon.identity.mgt.config.StorageType;
@@ -199,6 +201,10 @@ public class IdentityMgtServiceComponent {
                 UserOperationEventListener.class.getName(), notificationListener, null);
         context.getBundleContext().registerService(TenantMgtListener.class.getName(), new TenantManagementListener()
                 , null);
+        context.getBundleContext().registerService(TenantMgtListener.class.getName(), new TenantSyncListener()
+                , null);
+        context.getBundleContext().registerService(UserOperationEventListener.class.getName(),
+                new UserSessionTerminationListener(), null);
         context.getBundleContext().registerService(UserOperationEventListener.class.getName(),
                 new UserSessionTerminationListener(), null);
         IdentityClaimValueEncryptionListener identityClaimValueEncryptionListener =
@@ -412,5 +418,23 @@ public class IdentityMgtServiceComponent {
             log.debug("claimManagementService unset in IdentityMgtServiceComponent bundle");
         }
         IdentityMgtServiceDataHolder.setClaimManagementService(null);
+    }
+    @Reference(
+            name = "organization.service",
+            service = OrganizationManager.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetOrganizationManager"
+    )
+    protected void setOrganizationManager(OrganizationManager organizationManager) {
+
+        log.debug("OrganizationManager set in IdentityMgtServiceComponent bundle.");
+        IdentityMgtServiceDataHolder.getInstance().setOrganizationManager(organizationManager);
+    }
+
+    protected void unsetOrganizationManager(OrganizationManager organizationManager) {
+
+        log.debug("OrganizationManager unset in IdentityMgtServiceComponent bundle.");
+        IdentityMgtServiceDataHolder.getInstance().setOrganizationManager(null);
     }
 }
