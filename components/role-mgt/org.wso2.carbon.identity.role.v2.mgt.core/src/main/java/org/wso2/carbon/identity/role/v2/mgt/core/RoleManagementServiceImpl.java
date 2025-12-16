@@ -35,6 +35,7 @@ import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
 import org.wso2.carbon.identity.organization.management.service.util.OrganizationManagementUtil;
+import org.wso2.carbon.identity.role.v2.mgt.core.dao.CacheBackedRoleDAO;
 import org.wso2.carbon.identity.role.v2.mgt.core.dao.RoleDAO;
 import org.wso2.carbon.identity.role.v2.mgt.core.dao.RoleMgtDAOFactory;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementClientException;
@@ -74,7 +75,7 @@ import static org.wso2.carbon.identity.role.v2.mgt.core.RoleConstants.ORGANIZATI
 public class RoleManagementServiceImpl implements RoleManagementService {
 
     private static final Log log = LogFactory.getLog(RoleManagementServiceImpl.class);
-    private final RoleDAO roleDAO = RoleMgtDAOFactory.getInstance().getRoleDAO();
+    private final RoleDAO roleDAO = RoleMgtDAOFactory.getInstance().getCacheBackedRoleDAO();
     private final UserIDResolver userIDResolver = new UserIDResolver();
     private static final String IS_FRAGMENT_APP = "isFragmentApp";
 
@@ -1244,5 +1245,13 @@ public class RoleManagementServiceImpl implements RoleManagementService {
             throws IdentityRoleManagementException {
 
         return userIDResolver.getNamesByIDs(userIDs, tenantDomain);
+    }
+
+    @Override
+    public void clearRoleBasicInfoCacheByTenant(String tenantDomain) {
+
+        if (roleDAO instanceof CacheBackedRoleDAO) {
+            ((CacheBackedRoleDAO) roleDAO).clearRoleBasicInfoCacheByTenant(tenantDomain);
+        }
     }
 }
