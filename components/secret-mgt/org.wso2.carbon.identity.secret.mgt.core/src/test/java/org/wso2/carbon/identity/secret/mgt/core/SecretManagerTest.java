@@ -88,6 +88,7 @@ public class SecretManagerTest {
     private MockedStatic<CryptoUtil> cryptoUtil;
     MockedStatic<PrivilegedCarbonContext> privilegedCarbonContext;
     MockedStatic<IdentityTenantUtil> identityTenantUtil;
+    MockedStatic<IdentityUtil> identityUtil;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -112,8 +113,8 @@ public class SecretManagerTest {
         this.mockCryptoUtil = mock(CryptoUtil.class);
         cryptoUtil.when(CryptoUtil::getDefaultCryptoUtil).thenReturn(this.mockCryptoUtil);
 
-        mockStatic(IdentityUtil.class);
-        when(IdentityUtil.getProperty(IdentityConstants.ServerConfig.
+        identityUtil = mockStatic(IdentityUtil.class);
+        identityUtil.when(() -> IdentityUtil.getProperty(IdentityConstants.ServerConfig.
                 ENABLE_SECRET_TYPE_ENDPOINT)).thenReturn("true");
     }
 
@@ -126,6 +127,7 @@ public class SecretManagerTest {
         cryptoUtil.close();
         privilegedCarbonContext.close();
         identityTenantUtil.close();
+        identityUtil.close();
     }
 
     @Test(priority = 1)
