@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.role.v2.mgt.core.dao.RoleDAO;
+import org.wso2.carbon.identity.role.v2.mgt.core.dao.CacheBackedRoleDAO;
 import org.wso2.carbon.identity.role.v2.mgt.core.dao.RoleMgtDAOFactory;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementClientException;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
@@ -59,7 +59,7 @@ import static org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENA
 public class RoleManagementServiceImplTest extends IdentityBaseTest {
 
     @Mock
-    private RoleDAO roleDAO;
+    private CacheBackedRoleDAO roleDAO;
 
     private RoleManagementServiceImpl roleManagementService;
 
@@ -89,6 +89,7 @@ public class RoleManagementServiceImplTest extends IdentityBaseTest {
         roleMgtDAOFactory.when(RoleMgtDAOFactory::getInstance)
                 .thenReturn(mockRoleMgtDAOFactory);
         when(mockRoleMgtDAOFactory.getRoleDAO()).thenReturn(roleDAO);
+        when(mockRoleMgtDAOFactory.getCacheBackedRoleDAO()).thenReturn(roleDAO);
 
         roleManagementService = new RoleManagementServiceImpl();
     }

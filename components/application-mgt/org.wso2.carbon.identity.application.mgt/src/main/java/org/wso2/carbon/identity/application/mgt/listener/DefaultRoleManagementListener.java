@@ -19,6 +19,8 @@
 package org.wso2.carbon.identity.application.mgt.listener;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.application.common.model.ApplicationBasicInfo;
@@ -66,6 +68,8 @@ import static org.wso2.carbon.identity.role.v2.mgt.core.RoleConstants.ORGANIZATI
  * and application based role management.
  */
 public class DefaultRoleManagementListener extends AbstractApplicationMgtListener implements RoleManagementListener {
+
+    private static final Log LOG = LogFactory.getLog(DefaultRoleManagementListener.class);
 
     @Override
     public int getExecutionOrderId() {
@@ -687,6 +691,21 @@ public class DefaultRoleManagementListener extends AbstractApplicationMgtListene
             throw new IdentityApplicationManagementException(
                     String.format("Error occurred while deleting roles created for the application: %s.",
                             serviceProvider.getApplicationName()), e);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean doPostUpdateApplication(ServiceProvider serviceProvider, String tenantDomain, String userName)
+            throws IdentityApplicationManagementException {
+
+        // Clear role basic info cache when application is updated, This is necessary because RoleBasicInfo contains
+        // audienceName (application name). When application name changes, cached role basic info becomes stale.
+        ApplicationManagementServiceComponentHolder.getInstance().getRoleManagementServiceV2()
+                .clearRoleBasicInfoCacheByTenant(tenantDomain);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Cleared role basic info cache for tenant: " + tenantDomain +
+                    " due to application update: " + serviceProvider.getApplicationResourceId());
         }
         return true;
     }
