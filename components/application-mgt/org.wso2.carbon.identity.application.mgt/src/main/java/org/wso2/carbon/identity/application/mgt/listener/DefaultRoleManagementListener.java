@@ -697,11 +697,9 @@ public class DefaultRoleManagementListener extends AbstractApplicationMgtListene
     }
 
     @Override
-    public boolean doPostUpdateApplication(ServiceProvider serviceProvider, String tenantDomain, String userName)
+    public boolean doPreUpdateApplication(ServiceProvider serviceProvider, String tenantDomain, String userName)
             throws IdentityApplicationManagementException {
 
-        // Clear role basic info cache when application is updated, This is necessary because RoleBasicInfo contains
-        // audienceName (application name). When application name changes, cached role basic info becomes stale.
         RoleManagementUtils.clearRoleBasicInfoCacheByTenant(tenantDomain);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Cleared role basic info cache for tenant: " + tenantDomain +

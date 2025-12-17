@@ -38,8 +38,8 @@ import java.util.Map;
 public class RoleManagementOrganizationHandler extends AbstractEventHandler {
 
     private static final Log LOG = LogFactory.getLog(RoleManagementOrganizationHandler.class);
-    private static final String EVENT_POST_UPDATE_ORGANIZATION = "POST_UPDATE_ORGANIZATION";
-    private static final String EVENT_POST_PATCH_ORGANIZATION = "POST_PATCH_ORGANIZATION";
+    private static final String EVENT_PRE_UPDATE_ORGANIZATION = "PRE_UPDATE_ORGANIZATION";
+    private static final String EVENT_PRE_PATCH_ORGANIZATION = "PRE_PATCH_ORGANIZATION";
     private static final String EVENT_PRE_DELETE_ORGANIZATION = "PRE_DELETE_ORGANIZATION";
     private static final String EVENT_PROP_ORGANIZATION_ID = "ORGANIZATION_ID";
 
@@ -50,8 +50,8 @@ public class RoleManagementOrganizationHandler extends AbstractEventHandler {
         Map<String, Object> eventProperties = event.getEventProperties();
 
         switch (eventName) {
-            case EVENT_POST_UPDATE_ORGANIZATION:
-            case EVENT_POST_PATCH_ORGANIZATION:
+            case EVENT_PRE_UPDATE_ORGANIZATION:
+            case EVENT_PRE_PATCH_ORGANIZATION:
             case EVENT_PRE_DELETE_ORGANIZATION:
                 clearRoleBasicInfoCache(eventProperties);
                 break;
