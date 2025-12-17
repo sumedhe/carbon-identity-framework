@@ -49,6 +49,7 @@ import org.wso2.carbon.identity.role.v2.mgt.core.model.Permission;
 import org.wso2.carbon.identity.role.v2.mgt.core.model.Role;
 import org.wso2.carbon.identity.role.v2.mgt.core.model.RoleBasicInfo;
 import org.wso2.carbon.identity.role.v2.mgt.core.model.UserBasicInfo;
+import org.wso2.carbon.identity.role.v2.mgt.core.util.RoleManagementUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -701,8 +702,7 @@ public class DefaultRoleManagementListener extends AbstractApplicationMgtListene
 
         // Clear role basic info cache when application is updated, This is necessary because RoleBasicInfo contains
         // audienceName (application name). When application name changes, cached role basic info becomes stale.
-        ApplicationManagementServiceComponentHolder.getInstance().getRoleManagementServiceV2()
-                .clearRoleBasicInfoCacheByTenant(tenantDomain);
+        RoleManagementUtils.clearRoleBasicInfoCacheByTenant(tenantDomain);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Cleared role basic info cache for tenant: " + tenantDomain +
                     " due to application update: " + serviceProvider.getApplicationResourceId());

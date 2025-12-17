@@ -484,13 +484,4 @@ public interface RoleManagementService {
 
         return null;
     }
-
-    /**
-     * Clear role basic info cache for a given tenant.
-     * This should be called when audience names (application/organization names) change.
-     *
-     * @param tenantDomain Tenant domain.
-     */
-    default void clearRoleBasicInfoCacheByTenant(String tenantDomain) {
-    }
 }

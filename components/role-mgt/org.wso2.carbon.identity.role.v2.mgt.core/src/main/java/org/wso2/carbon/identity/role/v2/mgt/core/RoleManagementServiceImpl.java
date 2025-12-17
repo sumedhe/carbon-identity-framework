@@ -1245,10 +1245,4 @@ public class RoleManagementServiceImpl implements RoleManagementService {
 
         return userIDResolver.getNamesByIDs(userIDs, tenantDomain);
     }
-
-    @Override
-    public void clearRoleBasicInfoCacheByTenant(String tenantDomain) {
-
-        RoleManagementUtils.clearRoleBasicInfoCacheByTenant(tenantDomain);
-    }
 }

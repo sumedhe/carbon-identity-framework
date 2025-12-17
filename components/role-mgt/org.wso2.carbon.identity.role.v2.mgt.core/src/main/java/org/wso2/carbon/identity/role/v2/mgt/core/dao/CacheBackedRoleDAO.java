@@ -94,7 +94,7 @@ public class CacheBackedRoleDAO extends RoleDAOImpl {
      * @param roleId       Role ID.
      * @param tenantDomain Tenant domain.
      */
-    public void clearRoleBasicInfoCache(String roleId, String tenantDomain) {
+    private void clearRoleBasicInfoCache(String roleId, String tenantDomain) {
 
         RoleBasicInfoCacheKey cacheKey = new RoleBasicInfoCacheKey(roleId);
         roleBasicInfoCache.clearCacheEntry(cacheKey, tenantDomain);
@@ -109,7 +109,7 @@ public class CacheBackedRoleDAO extends RoleDAOImpl {
      *
      * @param tenantDomain Tenant domain.
      */
-    public void clearRoleBasicInfoCacheByTenant(String tenantDomain) {
+    private void clearRoleBasicInfoCacheByTenant(String tenantDomain) {
 
         roleBasicInfoCache.clear(tenantDomain);
         if (LOG.isDebugEnabled()) {
