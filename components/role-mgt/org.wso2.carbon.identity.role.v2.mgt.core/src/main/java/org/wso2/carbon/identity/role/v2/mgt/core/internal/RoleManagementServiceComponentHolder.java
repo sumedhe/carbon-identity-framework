@@ -21,7 +21,6 @@ package org.wso2.carbon.identity.role.v2.mgt.core.internal;
 import org.wso2.carbon.identity.api.resource.mgt.APIResourceManager;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
-import org.wso2.carbon.identity.role.v2.mgt.core.RoleManagementService;
 import org.wso2.carbon.identity.role.v2.mgt.core.listener.RoleManagementListener;
 import org.wso2.carbon.idp.mgt.IdpManager;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -43,7 +42,6 @@ public class RoleManagementServiceComponentHolder {
     private OrganizationManager organizationManager;
     private IdpManager identityProviderManager;
     private APIResourceManager apiResourceManager;
-    private RoleManagementService roleManagementServiceV2;
     private List<RoleManagementListener> roleManagementListenerList = new ArrayList<>();
 
     private RoleManagementServiceComponentHolder() {
@@ -177,25 +175,5 @@ public class RoleManagementServiceComponentHolder {
     public void addRoleManagementListener(RoleManagementListener roleManagementListener) {
 
         this.roleManagementListenerList.add(roleManagementListener);
-    }
-
-    /**
-     * Get {@link RoleManagementService}.
-     *
-     * @return Instance of {@link RoleManagementService}.
-     */
-    public RoleManagementService getRoleManagementServiceV2() {
-
-        return roleManagementServiceV2;
-    }
-
-    /**
-     * Set {@link RoleManagementService}.
-     *
-     * @param roleManagementServiceV2 Instance of {@link RoleManagementService}.
-     */
-    public void setRoleManagementServiceV2(RoleManagementService roleManagementServiceV2) {
-
-        this.roleManagementServiceV2 = roleManagementServiceV2;
     }
 }

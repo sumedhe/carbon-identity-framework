@@ -54,9 +54,7 @@ public class RoleManagementServiceComponent {
 
         try {
             BundleContext bundleContext = context.getBundleContext();
-            RoleManagementService roleManagementService = new RoleManagementServiceImpl();
-            bundleContext.registerService(RoleManagementService.class, roleManagementService, null);
-            RoleManagementServiceComponentHolder.getInstance().setRoleManagementServiceV2(roleManagementService);
+            bundleContext.registerService(RoleManagementService.class, new RoleManagementServiceImpl(), null);
             bundleContext.registerService(RoleManagementListener.class, new RoleManagementV2AuditLogger(), null);
             bundleContext.registerService(AbstractEventHandler.class, new RoleManagementOrganizationHandler(), null);
 
@@ -69,7 +67,6 @@ public class RoleManagementServiceComponent {
     @Deactivate
     protected void deactivate(ComponentContext context) {
 
-        RoleManagementServiceComponentHolder.getInstance().setRoleManagementServiceV2(null);
         log.debug("Role V2 management service is deactivated.");
     }
 

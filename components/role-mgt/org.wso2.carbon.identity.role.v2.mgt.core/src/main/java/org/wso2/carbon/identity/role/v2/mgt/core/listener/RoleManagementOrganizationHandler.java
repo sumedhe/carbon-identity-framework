@@ -25,8 +25,8 @@ import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.organization.management.service.OrganizationManager;
 import org.wso2.carbon.identity.organization.management.service.exception.OrganizationManagementException;
-import org.wso2.carbon.identity.role.v2.mgt.core.RoleManagementService;
 import org.wso2.carbon.identity.role.v2.mgt.core.internal.RoleManagementServiceComponentHolder;
+import org.wso2.carbon.identity.role.v2.mgt.core.util.RoleManagementUtils;
 
 import java.util.Map;
 
@@ -74,9 +74,7 @@ public class RoleManagementOrganizationHandler extends AbstractEventHandler {
             OrganizationManager organizationManager = RoleManagementServiceComponentHolder.getInstance()
                     .getOrganizationManager();
             String tenantDomain = organizationManager.resolveTenantDomain(organizationId);
-            RoleManagementService roleManagementService = RoleManagementServiceComponentHolder.getInstance()
-                    .getRoleManagementServiceV2();
-            roleManagementService.clearRoleBasicInfoCacheByTenant(tenantDomain);
+            RoleManagementUtils.clearRoleBasicInfoCacheByTenant(tenantDomain);
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Cleared role basic info cache for tenant: " + tenantDomain +
