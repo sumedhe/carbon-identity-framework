@@ -74,6 +74,7 @@ public class TenantSyncListener implements TenantMgtListener {
 
     @Override
     public void onTenantCreate(TenantInfoBean tenantInfo) throws StratosException {
+
         if (isTenantEventFiringEnabled(tenantInfo.getTenantId())) {
             sendEvent(tenantInfo, TenantManagement.ACTION_CREATE, TenantManagement.EVENT_CREATE_TENANT_URI);
         }
@@ -81,6 +82,7 @@ public class TenantSyncListener implements TenantMgtListener {
 
     @Override
     public void onTenantUpdate(TenantInfoBean tenantInfo) throws StratosException {
+
         if (isTenantEventFiringEnabled(tenantInfo.getTenantId())) {
             sendEvent(tenantInfo, TenantManagement.ACTION_UPDATE, TenantManagement.EVENT_UPDATE_TENANT_URI);
         }
@@ -105,6 +107,7 @@ public class TenantSyncListener implements TenantMgtListener {
      * @param eventUri The URI for the event.
      */
     private void fireTenantLifecycleEvent(int tenantId, boolean isActive, String action, String eventUri) {
+
         if (!isTenantEventFiringEnabled(tenantId)) return;
 
         try {
@@ -129,12 +132,14 @@ public class TenantSyncListener implements TenantMgtListener {
 
     @Override
     public void onTenantActivation(int tenantId) throws StratosException {
+
         fireTenantLifecycleEvent(tenantId, true, TenantManagement.ACTION_ACTIVATE,
                 TenantManagement.EVENT_ACTIVATE_TENANT_URI);
     }
 
     @Override
     public void onTenantDeactivation(int tenantId) throws StratosException {
+
         fireTenantLifecycleEvent(tenantId, false, TenantManagement.ACTION_DEACTIVATE,
                 TenantManagement.EVENT_ACTIVATE_TENANT_URI);
     }
@@ -214,6 +219,7 @@ public class TenantSyncListener implements TenantMgtListener {
      * @param eventURI   URI of the event.
      */
     private void sendEvent(TenantInfoBean tenantInfo, String type, String eventURI) {
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("Sending event. Event type: " + type + ", Tenant ID: " + tenantInfo.getTenantId());
         }
@@ -332,6 +338,7 @@ public class TenantSyncListener implements TenantMgtListener {
 
         @Override
         public void run() {
+
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Sending HTTP request to notification endpoint: " + notificationEndpoint);
             }
@@ -398,6 +405,7 @@ public class TenantSyncListener implements TenantMgtListener {
         }
 
         private long calculateNextDelay(int attempt) {
+
             long exponentialDelay = (long) (INITIAL_RETRY_DELAY_MS * Math.pow(BACKOFF_FACTOR, attempt - 1));
             // Return the calculated delay, ensuring it does not exceed the maximum cap.
             return Math.min(exponentialDelay, MAX_RETRY_DELAY_MS);
