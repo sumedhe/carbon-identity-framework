@@ -18,11 +18,14 @@
 
 package org.wso2.carbon.identity.role.v2.mgt.core.model;
 
+import java.io.Serializable;
+
 /**
  * Represents the basic attributes of an entity.
  */
-public class Entity {
+public class Entity implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private String id;
     private String name;
 

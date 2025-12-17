@@ -23,6 +23,8 @@ package org.wso2.carbon.identity.role.v2.mgt.core.model;
  */
 public class GroupBasicInfo extends Entity {
 
+    private static final long serialVersionUID = 1L;
+
     public GroupBasicInfo() {
 
     }

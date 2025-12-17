@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.role.v2.mgt.core.RoleConstants;
+import org.wso2.carbon.identity.role.v2.mgt.core.cache.RoleBasicInfoCache;
 import org.wso2.carbon.identity.role.v2.mgt.core.dao.RoleDAO;
 import org.wso2.carbon.identity.role.v2.mgt.core.dao.RoleMgtDAOFactory;
 import org.wso2.carbon.identity.role.v2.mgt.core.exception.IdentityRoleManagementException;
@@ -89,5 +90,16 @@ public class RoleManagementUtils {
     public static boolean isAllowSystemPrefixForRole() {
 
         return Boolean.parseBoolean(IdentityUtil.getProperty(ALLOW_SYSTEM_PREFIX_FOR_ROLES));
+    }
+
+    /**
+     * Clear all role basic info cache entries for a tenant.
+     * This is useful when application names change, which affects the audience name in cached role info.
+     *
+     * @param tenantDomain Tenant domain.
+     */
+    public static void clearRoleBasicInfoCacheByTenant(String tenantDomain) {
+
+        RoleBasicInfoCache.getInstance().clear(tenantDomain);
     }
 }
