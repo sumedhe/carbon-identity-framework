@@ -483,19 +483,11 @@ public class CustomCXFNonSpringJaxrsServlet extends CXFNonSpringServlet {
                 Object instance = provider.getProvider();
                 this.injectProperties(instance, props);
                 return isApplication ? provider : instance;
-            } catch (InstantiationException exception) {
-                LOG.error("Resource class " + cls.getName() + " can not be instantiated", exception);
-                throw new ServletException("Resource class " + cls.getName() + " can not be instantiated");
-            } catch (IllegalAccessException exception) {
-                LOG.error("Resource class " + cls.getName() + " " +
-                        "can not be instantiated due to IllegalAccessException", exception);
-                throw new ServletException("Resource class " + cls.getName() + " " +
-                        "can not be instantiated due to IllegalAccessException");
-            } catch (InvocationTargetException exception) {
-                LOG.error("Resource class " + cls.getName() + " " +
-                        "can not be instantiated due to InvocationTargetException", exception);
-                throw new ServletException("Resource class " + cls.getName() + " " +
-                        "can not be instantiated due to InvocationTargetException");
+            } catch (IllegalAccessException | InstantiationException | InvocationTargetException exception) {
+                String exceptionType = exception.getClass().getSimpleName();
+                String message = "Resource class " + cls.getName() + " can not be instantiated due to " + exceptionType;
+                LOG.error(message, exception);
+                throw new ServletException(message);
             }
         }
     }
