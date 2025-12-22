@@ -42,6 +42,7 @@ import org.wso2.carbon.core.util.AdminServicesUtil;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.core.util.SignatureUtil;
 import org.wso2.carbon.core.util.Utils;
+import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.base.IdentityRuntimeException;
@@ -2215,7 +2216,15 @@ public class IdentityUtil {
     public static String processSingleCharWildcard(String value) {
 
         String wildcardChar = getProperty(SINGLE_CHARACTER_WILDCARD);
-        if (StringUtils.isBlank(value) || UNDERSCORE.equals(wildcardChar)) {
+        try {
+            if (StringUtils.isBlank(value) || UNDERSCORE.equals(wildcardChar) || JdbcUtils.isOracleDB()
+                    || JdbcUtils.isMSSqlDB() || JdbcUtils.isDB2DB()) {
+                return value;
+            }
+        } catch (DataAccessException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to check database type to process single wildcard property.", e);
+            }
             return value;
         }
         // Escape backslash first to avoid double-escaping.
