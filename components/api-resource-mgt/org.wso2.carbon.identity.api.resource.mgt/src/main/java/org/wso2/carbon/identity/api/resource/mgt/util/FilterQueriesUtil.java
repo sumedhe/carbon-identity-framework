@@ -206,7 +206,7 @@ public class FilterQueriesUtil {
     private static void startWithFilterBuilder(int count, String value, String attributeName, StringBuilder filter,
                                                FilterQueryBuilder filterQueryBuilder) {
 
-        String filterString = " LIKE ? ESCAPE '\\' AND ";
+        String filterString = " LIKE ? AND ";
         filter.append(attributeName).append(filterString);
         filterQueryBuilder.setFilterAttributeValue(count, value + "%");
     }
@@ -214,7 +214,7 @@ public class FilterQueriesUtil {
     private static void endWithFilterBuilder(int count, String value, String attributeName, StringBuilder filter,
                                              FilterQueryBuilder filterQueryBuilder) {
 
-        String filterString = " LIKE ? ESCAPE '\\' AND ";
+        String filterString = " LIKE ? AND ";
         filter.append(attributeName).append(filterString);
         filterQueryBuilder.setFilterAttributeValue(count, "%" + value);
     }
@@ -222,7 +222,7 @@ public class FilterQueriesUtil {
     private static void containsFilterBuilder(int count, String value, String attributeName, StringBuilder filter,
                                               FilterQueryBuilder filterQueryBuilder) {
 
-        String filterString = " LIKE ? ESCAPE '\\' AND ";
+        String filterString = " LIKE ? AND ";
         filter.append(attributeName).append(filterString);
         filterQueryBuilder.setFilterAttributeValue(count, "%" + value + "%");
     }
