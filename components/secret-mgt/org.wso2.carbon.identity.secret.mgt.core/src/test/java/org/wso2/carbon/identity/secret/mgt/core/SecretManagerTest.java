@@ -28,10 +28,8 @@ import org.wso2.carbon.base.CarbonBaseConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.identity.base.IdentityConstants;
 import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.secret.mgt.core.dao.SecretDAO;
 import org.wso2.carbon.identity.secret.mgt.core.dao.impl.SecretDAOImpl;
 import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementClientException;
@@ -88,7 +86,6 @@ public class SecretManagerTest {
     private MockedStatic<CryptoUtil> cryptoUtil;
     MockedStatic<PrivilegedCarbonContext> privilegedCarbonContext;
     MockedStatic<IdentityTenantUtil> identityTenantUtil;
-    MockedStatic<IdentityUtil> identityUtil;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -112,10 +109,6 @@ public class SecretManagerTest {
         cryptoUtil = mockStatic(CryptoUtil.class);
         this.mockCryptoUtil = mock(CryptoUtil.class);
         cryptoUtil.when(CryptoUtil::getDefaultCryptoUtil).thenReturn(this.mockCryptoUtil);
-
-        identityUtil = mockStatic(IdentityUtil.class);
-        identityUtil.when(() -> IdentityUtil.getProperty(IdentityConstants.ServerConfig.
-                ENABLE_SECRET_TYPE_ENDPOINT)).thenReturn("true");
     }
 
     @AfterMethod
@@ -127,7 +120,6 @@ public class SecretManagerTest {
         cryptoUtil.close();
         privilegedCarbonContext.close();
         identityTenantUtil.close();
-        identityUtil.close();
     }
 
     @Test(priority = 1)

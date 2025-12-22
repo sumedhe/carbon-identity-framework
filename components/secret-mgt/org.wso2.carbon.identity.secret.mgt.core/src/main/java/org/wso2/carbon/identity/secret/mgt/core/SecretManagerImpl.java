@@ -27,9 +27,6 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.identity.base.IdentityConstants;
-import org.wso2.carbon.identity.core.util.IdentityUtil;
-import org.wso2.carbon.identity.secret.mgt.core.constant.SecretConstants;
 import org.wso2.carbon.identity.secret.mgt.core.dao.SecretDAO;
 import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementClientException;
 import org.wso2.carbon.identity.secret.mgt.core.exception.SecretManagementException;
@@ -228,7 +225,6 @@ public class SecretManagerImpl implements SecretManager {
     @Override
     public SecretType addSecretType(SecretType secretType) throws SecretManagementException {
 
-        validateSecretTypeApiAvailability();
         validateSecretTypeCreateRequest(secretType);
         String secretTypeID = generateUniqueID();
         secretType.setId(secretTypeID);
@@ -248,7 +244,6 @@ public class SecretManagerImpl implements SecretManager {
     @Override
     public SecretType replaceSecretType(SecretType secretType) throws SecretManagementException {
 
-        validateSecretTypeApiAvailability();
         validateSecretTypeReplaceRequest(secretType);
         String secretTypeID;
         secretTypeID = retrieveOrGenerateSecretTypeId(secretType.getName());
@@ -268,7 +263,6 @@ public class SecretManagerImpl implements SecretManager {
     @Override
     public SecretType getSecretType(String secretTypeName) throws SecretManagementException {
 
-        validateSecretTypeApiAvailability();
         validateSecretTypeRetrieveRequest(secretTypeName);
         SecretType secretType = getSecretDAO().getSecretTypeByName(secretTypeName);
         if (secretType == null || secretType.getId() == null) {
@@ -286,7 +280,6 @@ public class SecretManagerImpl implements SecretManager {
     @Override
     public void deleteSecretType(String secretTypeName) throws SecretManagementException {
 
-        validateSecretTypeApiAvailability();
         validateSecretTypeDeleteRequest(secretTypeName);
         getSecretDAO().deleteSecretTypeByName(secretTypeName);
 
@@ -605,22 +598,6 @@ public class SecretManagerImpl implements SecretManager {
                 log.debug("A secret type with the name: " + secretType.getName() + " does not exists.");
             }
             throw handleClientException(ERROR_CODE_SECRET_TYPE_DOES_NOT_EXISTS, secretType.getName());
-        }
-    }
-
-    private static String getSecretTypeEndpointConfig() {
-
-        return IdentityUtil.getProperty(IdentityConstants.ServerConfig.
-                ENABLE_SECRET_TYPE_ENDPOINT);
-    }
-
-    private static void validateSecretTypeApiAvailability() throws SecretManagementClientException {
-
-        String enableSecretTypeEndpoint = getSecretTypeEndpointConfig();
-        if (!Boolean.parseBoolean(enableSecretTypeEndpoint)) {
-            throw new SecretManagementClientException(
-                    SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getCode(),
-                    SecretConstants.ErrorMessages.ERROR_CODE_NOT_IMPLEMENTED_SECRET_TYPE_API.getMessage());
         }
     }
 }
