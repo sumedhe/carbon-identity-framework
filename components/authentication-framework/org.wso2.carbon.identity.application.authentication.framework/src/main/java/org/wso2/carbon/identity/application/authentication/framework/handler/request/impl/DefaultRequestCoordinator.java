@@ -79,7 +79,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -1390,37 +1389,6 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
             }
         }
         return false;
-    }
-
-    private void addServiceProviderIdToRedirectUrl(CommonAuthResponseWrapper responseWrapper,
-                                                   AuthenticationContext context) {
-
-        if (responseWrapper == null || context == null) {
-            return;
-        }
-        try {
-            String redirectURL = responseWrapper.getRedirectURL();
-            String serviceProviderID = context.getServiceProviderResourceId();
-            if (StringUtils.isNotBlank(redirectURL) && StringUtils.isNotBlank(serviceProviderID)) {
-                URI uri = new URI(redirectURL);
-                String query = uri.getRawQuery();
-                if (StringUtils.isNotBlank(query)) {
-                    if (!query.contains(FrameworkConstants.REQUEST_PARAM_SP_UUID + "=")) {
-                        redirectURL = redirectURL + "&" + FrameworkConstants.REQUEST_PARAM_SP_UUID
-                                + "=" + URLEncoder.encode(serviceProviderID,
-                                StandardCharsets.UTF_8.name());
-                    }
-                } else {
-                    redirectURL = redirectURL + "?" + FrameworkConstants.REQUEST_PARAM_SP_UUID
-                            + "=" + URLEncoder.encode(serviceProviderID, StandardCharsets.UTF_8.name());
-                }
-                responseWrapper.sendRedirect(redirectURL);
-            }
-        } catch (URISyntaxException | IOException e) {
-            // No need to break the flow due to this error since added spId to redirect URL is used only
-            // for branding purposes.
-            log.debug("Error while adding spId to redirect URL.");
-        }
     }
 
     private boolean isForceAuthEnabled(HttpServletRequest request) {
