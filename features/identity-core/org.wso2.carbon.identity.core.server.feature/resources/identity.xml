@@ -2802,6 +2802,8 @@
         <SetAccountLockAuthFailureReason>false</SetAccountLockAuthFailureReason>
     </APIResponse>
 
+    <MarkStepCompletedOnInterrupt>true</MarkStepCompletedOnInterrupt>
+
     <CacheInvalidator>
         <MB>
             <Enabled>false</Enabled>
