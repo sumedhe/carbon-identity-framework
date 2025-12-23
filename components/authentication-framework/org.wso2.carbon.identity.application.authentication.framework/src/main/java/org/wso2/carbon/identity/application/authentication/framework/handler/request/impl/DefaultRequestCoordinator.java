@@ -76,7 +76,6 @@ import org.wso2.carbon.utils.DiagnosticLog;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -417,13 +416,7 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
 
                 if (!context.isLogoutRequest()) {
                     FrameworkUtils.getAuthenticationRequestHandler().handle(request, responseWrapper, context);
-
-                    // Adding spId param to the redirect URL if it is not an external system call.
-                    boolean isExternalCall = Boolean.TRUE.equals(
-                            request.getAttribute(FrameworkConstants.IS_EXTERNAL_CALL));
-                    if (!isExternalCall) {
-                        addServiceProviderIdToRedirectUrl(responseWrapper, context);
-                    }
+                    addServiceProviderIdToRedirectUrl(responseWrapper, context, request);
                 } else {
                     FrameworkUtils.getLogoutRequestHandler().handle(request, responseWrapper, context);
                 }
@@ -1433,5 +1426,30 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
     private boolean isForceAuthEnabled(HttpServletRequest request) {
 
         return Boolean.parseBoolean(request.getParameter(FORCE_AUTHENTICATE));
+    }
+
+    private void addServiceProviderIdToRedirectUrl(CommonAuthResponseWrapper responseWrapper,
+                                                   AuthenticationContext context, HttpServletRequest request) {
+
+        if (responseWrapper == null || context == null) {
+            return;
+        }
+        boolean isExternalCall = Boolean.TRUE.equals(request.getAttribute(FrameworkConstants.IS_EXTERNAL_CALL));
+        if (isExternalCall) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping adding spId to redirect URL since it is an external system call.");
+            }
+            return;
+        }
+        try {
+            String redirectURL = responseWrapper.getRedirectURL();
+            String serviceProviderID = context.getServiceProviderResourceId();
+            redirectURL = FrameworkUtils.appendQueryParamsStringToUrl(redirectURL,
+                    FrameworkConstants.REQUEST_PARAM_SP_UUID + "=" + serviceProviderID);
+            responseWrapper.sendRedirect(redirectURL);
+        } catch (IOException e) {
+            // No need to break the flow as spId is used in redirect URL only for branding purposes.
+            log.debug("Error while adding spId to redirect URL.");
+        }
     }
 }
