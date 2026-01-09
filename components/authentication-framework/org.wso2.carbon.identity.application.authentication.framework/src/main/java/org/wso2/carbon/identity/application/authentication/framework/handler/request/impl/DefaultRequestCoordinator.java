@@ -76,9 +76,11 @@ import org.wso2.carbon.utils.DiagnosticLog;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -1412,11 +1414,24 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
         try {
             String redirectURL = responseWrapper.getRedirectURL();
             String serviceProviderID = context.getServiceProviderResourceId();
-            redirectURL = FrameworkUtils.appendQueryParamsStringToUrl(redirectURL,
-                    FrameworkConstants.REQUEST_PARAM_SP_UUID + "=" + serviceProviderID);
-            responseWrapper.sendRedirect(redirectURL);
-        } catch (IOException e) {
-            // No need to break the flow as spId is used in redirect URL only for branding purposes.
+            if (StringUtils.isNotBlank(redirectURL) && StringUtils.isNotBlank(serviceProviderID)) {
+                URI uri = new URI(redirectURL);
+                String query = uri.getRawQuery();
+                if ((StringUtils.isNotBlank(query) && !query.contains(FrameworkConstants.REQUEST_PARAM_SP_UUID + "="))
+                        || StringUtils.isBlank(query)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Adding service provider ID to redirect URL for SP: "
+                                + context.getServiceProviderName());
+                    }
+                    redirectURL = FrameworkUtils.appendQueryParamsStringToUrl(redirectURL,
+                            FrameworkConstants.REQUEST_PARAM_SP_UUID + "=" +
+                                    URLEncoder.encode(serviceProviderID, StandardCharsets.UTF_8.name()));
+                }
+                responseWrapper.sendRedirect(redirectURL);
+            }
+        } catch (URISyntaxException | IOException e) {
+            // No need to break the flow due to this error since added spId to redirect URL is used only
+            // for branding purposes.
             log.debug("Error while adding spId to redirect URL.");
         }
     }
