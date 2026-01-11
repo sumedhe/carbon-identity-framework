@@ -417,7 +417,12 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
 
                 if (!context.isLogoutRequest()) {
                     FrameworkUtils.getAuthenticationRequestHandler().handle(request, responseWrapper, context);
-                    addServiceProviderIdToRedirectUrl(responseWrapper, context, request);
+                    // Adding spId param to the redirect URL if it is not an external system call.
+                    boolean isExternalCall = Boolean.TRUE.equals(
+                            request.getAttribute(FrameworkConstants.IS_EXTERNAL_CALL));
+                    if (!isExternalCall) {
+                        addServiceProviderIdToRedirectUrl(responseWrapper, context);
+                    }
                 } else {
                     FrameworkUtils.getLogoutRequestHandler().handle(request, responseWrapper, context);
                 }
@@ -1399,16 +1404,9 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
     }
 
     private void addServiceProviderIdToRedirectUrl(CommonAuthResponseWrapper responseWrapper,
-                                                   AuthenticationContext context, HttpServletRequest request) {
+                                                   AuthenticationContext context) {
 
         if (responseWrapper == null || context == null) {
-            return;
-        }
-        boolean isExternalCall = Boolean.TRUE.equals(request.getAttribute(FrameworkConstants.IS_EXTERNAL_CALL));
-        if (isExternalCall) {
-            if (log.isDebugEnabled()) {
-                log.debug("Skipping adding spId to redirect URL since it is an external system call.");
-            }
             return;
         }
         try {
@@ -1417,15 +1415,15 @@ public class DefaultRequestCoordinator extends AbstractRequestCoordinator implem
             if (StringUtils.isNotBlank(redirectURL) && StringUtils.isNotBlank(serviceProviderID)) {
                 URI uri = new URI(redirectURL);
                 String query = uri.getRawQuery();
-                if ((StringUtils.isNotBlank(query) && !query.contains(FrameworkConstants.REQUEST_PARAM_SP_UUID + "="))
-                        || StringUtils.isBlank(query)) {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Adding service provider ID to redirect URL for SP: "
-                                + context.getServiceProviderName());
+                if (StringUtils.isNotBlank(query)) {
+                    if (!query.contains(FrameworkConstants.REQUEST_PARAM_SP_UUID + "=")) {
+                        redirectURL = redirectURL + "&" + FrameworkConstants.REQUEST_PARAM_SP_UUID
+                                + "=" + URLEncoder.encode(serviceProviderID,
+                                StandardCharsets.UTF_8.name());
                     }
-                    redirectURL = FrameworkUtils.appendQueryParamsStringToUrl(redirectURL,
-                            FrameworkConstants.REQUEST_PARAM_SP_UUID + "=" +
-                                    URLEncoder.encode(serviceProviderID, StandardCharsets.UTF_8.name()));
+                } else {
+                    redirectURL = redirectURL + "?" + FrameworkConstants.REQUEST_PARAM_SP_UUID
+                            + "=" + URLEncoder.encode(serviceProviderID, StandardCharsets.UTF_8.name());
                 }
                 responseWrapper.sendRedirect(redirectURL);
             }

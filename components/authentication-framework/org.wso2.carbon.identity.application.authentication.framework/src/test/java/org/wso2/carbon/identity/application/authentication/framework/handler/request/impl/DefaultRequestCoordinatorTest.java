@@ -52,6 +52,7 @@ import org.wso2.carbon.identity.testutil.IdentityBaseTest;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,9 +64,11 @@ import javax.servlet.http.HttpServletResponse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -544,5 +547,80 @@ public class DefaultRequestCoordinatorTest extends IdentityBaseTest {
             queryPairs.put(key, value);
         }
         return queryPairs;
+    }
+
+    /**
+     * Test the addServiceProviderIdToRedirectUrl method with various scenarios.
+     */
+    @Test
+    public void testAddServiceProviderIdToRedirectUrl() throws Exception {
+
+        // Use reflection to access the private method (current signature: two params).
+        Method method = DefaultRequestCoordinator.class.getDeclaredMethod(
+                "addServiceProviderIdToRedirectUrl",
+                CommonAuthResponseWrapper.class,
+                AuthenticationContext.class
+                                                                         );
+        method.setAccessible(true);
+
+        DefaultRequestCoordinator coordinator = new DefaultRequestCoordinator();
+
+        // Case 1: Null responseWrapper. Should return early without exception.
+        method.invoke(coordinator, null, mock(AuthenticationContext.class));
+
+        // Case 2: Null context. Should return early and not call sendRedirect on responseWrapper.
+        CommonAuthResponseWrapper responseWrapper = mock(CommonAuthResponseWrapper.class);
+        method.invoke(coordinator, responseWrapper, null);
+        verify(responseWrapper, times(0)).sendRedirect(anyString());
+
+        // Case 3: Blank redirect URL -> method should detect blank and not call sendRedirect.
+        responseWrapper = mock(CommonAuthResponseWrapper.class);
+        AuthenticationContext context = mock(AuthenticationContext.class);
+        when(responseWrapper.getRedirectURL()).thenReturn("");
+        when(context.getServiceProviderResourceId()).thenReturn("sp-blank");
+        method.invoke(coordinator, responseWrapper, context);
+        verify(responseWrapper, times(0)).sendRedirect(anyString());
+
+        // Case 4: Service provider ID is blank -> method should not call sendRedirect.
+        responseWrapper = mock(CommonAuthResponseWrapper.class);
+        context = mock(AuthenticationContext.class);
+        when(responseWrapper.getRedirectURL()).thenReturn("https://example.com/redirect");
+        when(context.getServiceProviderResourceId()).thenReturn(null);
+        method.invoke(coordinator, responseWrapper, context);
+        verify(responseWrapper, times(0)).sendRedirect(anyString());
+
+        // Case 5: Service provider ID is present and appended to URL with existing query param.
+        responseWrapper = mock(CommonAuthResponseWrapper.class);
+        context = mock(AuthenticationContext.class);
+        when(responseWrapper.getRedirectURL()).thenReturn("https://example.com/redirect?param=value");
+        when(context.getServiceProviderResourceId()).thenReturn("sp-resource-id-123");
+        when(context.getServiceProviderName()).thenReturn("TestSP");
+
+        String expectedUrl = "https://example.com/redirect?param=value&" +
+                FrameworkConstants.REQUEST_PARAM_SP_UUID + "=" + java.net.URLEncoder.encode(
+                "sp-resource-id-123", java.nio.charset.StandardCharsets.UTF_8.name());
+
+        method.invoke(coordinator, responseWrapper, context);
+
+        verify(responseWrapper, times(1)).sendRedirect(expectedUrl);
+
+        // Case 6: IOException thrown during sendRedirect. The method should catch and not propagate the exception.
+        responseWrapper = mock(CommonAuthResponseWrapper.class);
+        context = mock(AuthenticationContext.class);
+        // Use a URL that contains a query string.
+        when(responseWrapper.getRedirectURL()).thenReturn("https://example.com/redirect?existing=1");
+        when(context.getServiceProviderResourceId()).thenReturn("sp-resource-id-456");
+        when(context.getServiceProviderName()).thenReturn("TestSP2");
+
+        String expectedUrlForIOException = "https://example.com/redirect?existing=1&" +
+                FrameworkConstants.REQUEST_PARAM_SP_UUID + "=" + java.net.URLEncoder.encode(
+                "sp-resource-id-456", java.nio.charset.StandardCharsets.UTF_8.name());
+
+        doThrow(new IOException("Redirect failed")).when(responseWrapper).sendRedirect(anyString());
+
+        // Should not throw exception; only logs debug message.
+        method.invoke(coordinator, responseWrapper, context);
+
+        verify(responseWrapper, times(1)).sendRedirect(expectedUrlForIOException);
     }
 }
