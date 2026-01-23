@@ -4538,6 +4538,11 @@
     <AllowLegacyRoleClaimBehaviour>{{legacy_claims.allow_legacy_role_claim_behaviour}}</AllowLegacyRoleClaimBehaviour>
     {% endif %}
 
+     {% if console.ui.enable_scim_enterprise_user is defined %}
+     <!-- Config to allow legacy SCIM enterprise user behavior -->
+     <EnableSCIMEnterpriseUser>{{console.ui.enable_scim_enterprise_user}}</EnableSCIMEnterpriseUser>
+     {% endif %}
+
     {% if cache_invalidator.mb.enabled is defined %}
     <CacheInvalidator>
         <MB>
