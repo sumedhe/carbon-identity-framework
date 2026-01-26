@@ -1233,7 +1233,7 @@
         {% if oauth.jwt_x5t_hexify_required is defined %}
         <JWTX5tHexifyingRequired>{{oauth.jwt_x5t_hexify_required}}</JWTX5tHexifyingRequired>
         {% else %}
-        <JWTX5tHexifyingRequired>true</JWTX5tHexifyingRequired>
+        <JWTX5tHexifyingRequired>false</JWTX5tHexifyingRequired>
         {% endif %}
 
         <!-- Configuration for allowing users to enable the x5t#s256 parameter in JWT token -->

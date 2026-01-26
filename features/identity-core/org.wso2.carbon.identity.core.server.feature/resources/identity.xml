@@ -749,7 +749,7 @@
         <EnableJWTTokenValidationDuringIntrospection>true</EnableJWTTokenValidationDuringIntrospection>
 
         <!-- Configuration for allowing users to hexify the x5t, x5t#s256 parameters in JWT token -->
-        <JWTX5tHexifyingRequired>true</JWTX5tHexifyingRequired>
+        <JWTX5tHexifyingRequired>false</JWTX5tHexifyingRequired>
 
         <!-- Configuration for allowing users to enable the x5t#s256 parameter in JWT token -->
         <JWTX5tS256Enabled>false</JWTX5tS256Enabled>
