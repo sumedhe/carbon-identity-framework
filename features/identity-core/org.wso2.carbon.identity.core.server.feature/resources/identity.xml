@@ -748,6 +748,15 @@
         -->
         <EnableJWTTokenValidationDuringIntrospection>true</EnableJWTTokenValidationDuringIntrospection>
 
+        <!-- Configuration for allowing users to hexify the x5t, x5t#s256 parameters in JWT token -->
+        <JWTX5tHexifyingRequired>true</JWTX5tHexifyingRequired>
+
+        <!-- Configuration for allowing users to enable the x5t#s256 parameter in JWT token -->
+        <JWTX5tS256Enabled>false</JWTX5tS256Enabled>
+
+        <!-- Configuration for allowing users to enable the x5t parameter in JWT token -->
+        <JWTX5tEnabled>true</JWTX5tEnabled>
+
         <!--
         By enabling this config, any unregistered scopes(excluding internal scopes and allowed scopes)
         passed in a OAuth based authz request will be dropped.
@@ -1444,7 +1453,7 @@
                        type="org.wso2.carbon.identity.role.v2.mgt.core.listener.RoleManagementListener"
                        name="org.wso2.carbon.identity.provisioning.listener.ProvisioningRoleMgtListener"
                        orderId="999" enable="true"/>
-        
+
         <!-- User Identity Verification Event Listener -->
         <EventListener id="identity_verification_event_listener"
                        type="org.wso2.carbon.user.core.listener.UserOperationEventListener"
