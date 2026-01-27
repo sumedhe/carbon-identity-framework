@@ -2825,5 +2825,5 @@
     <PASTRCookieMaxAge>-1</PASTRCookieMaxAge>
 
     <!-- Config to allow legacy SCIM enterprise user behaviors -->
-    <EnableSCIMEnterpriseUser>true</EnableSCIMEnterpriseUser>
+    <EnableSCIMLegacyEnterpriseUser>false</EnableSCIMLegacyEnterpriseUser>
 </Server>
