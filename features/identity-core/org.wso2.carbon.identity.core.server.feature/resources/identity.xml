@@ -2823,4 +2823,7 @@
         </OnInitialUse>
     </OnDemandConfig>
     <PASTRCookieMaxAge>-1</PASTRCookieMaxAge>
+
+    <!-- Config to allow legacy SCIM enterprise user behaviors -->
+    <EnableSCIMLegacyEnterpriseUser>false</EnableSCIMLegacyEnterpriseUser>
 </Server>
