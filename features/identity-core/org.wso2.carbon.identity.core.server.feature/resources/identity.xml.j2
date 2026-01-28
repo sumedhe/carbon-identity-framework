@@ -1229,6 +1229,23 @@
         -->
         <EnableJWTTokenValidationDuringIntrospection>{{oauth.enable_jwt_token_validation_during_introspection}}</EnableJWTTokenValidationDuringIntrospection>
 
+        <!-- Configuration for allowing users to hexify the x5t, x5t#s256 parameters in JWT token -->
+        {% if oauth.jwt_x5t_hexify_required is defined %}
+        <JWTX5tHexifyingRequired>{{oauth.jwt_x5t_hexify_required}}</JWTX5tHexifyingRequired>
+        {% else %}
+        <JWTX5tHexifyingRequired>false</JWTX5tHexifyingRequired>
+        {% endif %}
+
+        <!-- Configuration for allowing users to enable the x5t#s256 parameter in JWT token -->
+        {% if oauth.jwt_x5t_s256_enabled is defined %}
+        <JWTX5tS256Enabled>{{oauth.jwt_x5t_s256_enabled}}</JWTX5tS256Enabled>
+        {% endif %}
+
+        <!-- Configuration for allowing users to enable the x5t parameter in JWT token -->
+        {% if oauth.jwt_x5t_enabled is defined %}
+        <JWTX5tEnabled>{{oauth.jwt_x5t_enabled}}</JWTX5tEnabled>
+        {% endif %}
+
         <!--
         By enabling this property, client id will be used as the sub claim for the access tokens issued for the
         authenticated applications.
@@ -4000,6 +4017,7 @@
             <IsThumbprintHexifyRequired>{{oauth.jwks_endpoint.is_thumbprint_hexify_required}}</IsThumbprintHexifyRequired>
             <!-- Configuration for allowing users to enable x5c parameter in JWKS response -->
             <EnableX5CInResponse>{{oauth.jwks_endpoint.enable_x5c_in_response | default(true)}}</EnableX5CInResponse>
+            <IsX5tRequired>{{oauth.jwks_endpoint.is_x5t_required | default(false)}}</IsX5tRequired>
         </JWKSEndpoint>
     </JWTValidatorConfigs>
 
