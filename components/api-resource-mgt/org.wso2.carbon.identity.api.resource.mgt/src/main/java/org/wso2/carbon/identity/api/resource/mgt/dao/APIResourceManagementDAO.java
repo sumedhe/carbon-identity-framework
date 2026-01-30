@@ -160,7 +160,7 @@ public interface APIResourceManagementDAO {
      * @param scope       Scope.
      * @param apiResource API resource.
      * @param tenantId    Tenant Id.
-     * @throws APIResourceMgtException If an error occurs while updating the API resource.
+     * @throws APIResourceMgtException If an error occurs while updating scope metadata.
      */
     default void updateScopeMetadataById(Scope scope, APIResource apiResource, Integer tenantId)
             throws APIResourceMgtException {
@@ -173,7 +173,7 @@ public interface APIResourceManagementDAO {
      *
      * @param apiId    API resource id.
      * @param tenantId Tenant Id.
-     * @throws APIResourceMgtException If an error occurs while deleting the API resource.
+     * @throws APIResourceMgtException If an error occurs while deleting the scope metadata.
      */
     void deleteAPIResourceById(String apiId, Integer tenantId) throws APIResourceMgtException;
 

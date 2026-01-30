@@ -149,7 +149,7 @@ public interface APIResourceManager {
      * @param apiResourceId API resource id.
      * @param scopeId       Scope id.
      * @param tenantDomain  Tenant domain.
-     * @throws APIResourceMgtException If an error occurs while deleting API scope.
+     * @throws APIResourceMgtException If an error occurs while deleting the scope.
      */
     default void deleteAPIScopeByScopeId(String apiResourceId, String scopeId, String tenantDomain)
             throws APIResourceMgtException {
@@ -175,7 +175,7 @@ public interface APIResourceManager {
      * @param scope        Scope.
      * @param apiResource  API Resource.
      * @param tenantDomain Tenant domain.
-     * @throws APIResourceMgtException If an error occurs while deleting API scope.
+     * @throws APIResourceMgtException If an error occurs while updating scope metadata.
      */
     default void updateScopeMetadataById(Scope scope, APIResource apiResource, String tenantDomain)
             throws APIResourceMgtException {
