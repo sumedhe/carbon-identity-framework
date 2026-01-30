@@ -173,7 +173,7 @@ public interface APIResourceManagementDAO {
      *
      * @param apiId    API resource id.
      * @param tenantId Tenant Id.
-     * @throws APIResourceMgtException If an error occurs while deleting the scope metadata.
+     * @throws APIResourceMgtException If an error occurs while deleting the scope.
      */
     void deleteAPIResourceById(String apiId, Integer tenantId) throws APIResourceMgtException;
 
