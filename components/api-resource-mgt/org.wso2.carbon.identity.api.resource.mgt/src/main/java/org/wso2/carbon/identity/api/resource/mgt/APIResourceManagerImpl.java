@@ -181,6 +181,16 @@ public class APIResourceManagerImpl implements APIResourceManager {
     }
 
     @Override
+    public void updateScopeMetadataById(Scope scope, APIResource apiResource, String tenantDomain)
+            throws APIResourceMgtException {
+
+        APIResourceManagerEventPublisherProxy publisherProxy = APIResourceManagerEventPublisherProxy.getInstance();
+        publisherProxy.publishPreUpdateScopeMetadataWithException(scope, apiResource, tenantDomain);
+        CACHE_BACKED_DAO.updateScopeMetadataById(scope, apiResource, IdentityTenantUtil.getTenantId(tenantDomain));
+        publisherProxy.publishPostUpdateScopeMetadataWithException(scope, apiResource, tenantDomain);
+    }
+
+    @Override
     public APIResource getAPIResourceByIdentifier(String apiResourceIdentifier, String tenantDomain)
             throws APIResourceMgtException {
 
@@ -220,7 +230,7 @@ public class APIResourceManagerImpl implements APIResourceManager {
 
         APIResourceManagerEventPublisherProxy publisherProxy = APIResourceManagerEventPublisherProxy.getInstance();
         publisherProxy.publishPreDeleteAPIScopeByScopeIdWithException(apiResourceId, scopeId, tenantDomain);
-        CACHE_BACKED_DAO.deleteScope(scopeId, IdentityTenantUtil.getTenantId(tenantDomain));
+        CACHE_BACKED_DAO.deleteScopeById(apiResourceId, scopeId, IdentityTenantUtil.getTenantId(tenantDomain));
         publisherProxy.publishPostDeleteAPIScopeByScopeId(apiResourceId, scopeId, tenantDomain);
     }
 

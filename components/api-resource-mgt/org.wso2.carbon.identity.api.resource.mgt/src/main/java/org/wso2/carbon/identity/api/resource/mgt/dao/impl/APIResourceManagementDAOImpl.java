@@ -395,6 +395,24 @@ public class APIResourceManagementDAOImpl implements APIResourceManagementDAO {
     }
 
     @Override
+    public void updateScopeMetadataById(Scope scope, APIResource apiResource, Integer tenantId)
+            throws APIResourceMgtException {
+
+        try (Connection dbConnection = IdentityDatabaseUtil.getDBConnection(false);
+             PreparedStatement preparedStatement = dbConnection.prepareStatement(
+                     SQLConstants.UPDATE_SCOPE_METADATA_BY_ID)) {
+            preparedStatement.setString(1, scope.getDisplayName());
+            preparedStatement.setString(2, scope.getDescription());
+            preparedStatement.setString(3, scope.getId());
+            preparedStatement.setInt(4, tenantId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw APIResourceManagementUtil.handleServerException(
+                    APIResourceManagementConstants.ErrorMessages.ERROR_CODE_ERROR_WHILE_UPDATING_SCOPE_METADATA, e);
+        }
+    }
+
+    @Override
     public void deleteAPIResourceById(String apiId, Integer tenantId) throws APIResourceMgtException {
 
         try {
@@ -677,7 +695,7 @@ public class APIResourceManagementDAOImpl implements APIResourceManagementDAO {
     }
 
     @Override
-    public void deleteScope(String scopeId, Integer tenantId) throws APIResourceMgtException {
+    public void deleteScopeById(String apiId, String scopeId, Integer tenantId) throws APIResourceMgtException {
 
         try {
             if (OrganizationManagementUtil.isOrganization(tenantId)) {

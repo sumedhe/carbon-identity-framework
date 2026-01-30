@@ -584,7 +584,7 @@ public class APIResourceManagementDAOImplTest {
                     .thenReturn(isOrganization);
             if (!isOrganization) {
                 // Testing the deleteScopeById method with the created API resource's ID and scope ID.
-                daoImpl.deleteScope(scopeId, deletingTenantId);
+                daoImpl.deleteScopeById(apiId, scopeId, deletingTenantId);
 
                 // Checking whether the scope is deleted.
                 identityDatabaseUtil.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
@@ -592,7 +592,7 @@ public class APIResourceManagementDAOImplTest {
                 Assert.assertFalse(daoImpl.isScopeExistById(scopeId, deletingTenantId));
             } else {
                 Assert.expectThrows(APIResourceMgtClientException.class, () ->
-                        daoImpl.deleteScope(scopeId, deletingTenantId));
+                        daoImpl.deleteScopeById(apiId, scopeId, deletingTenantId));
             }
         }
     }
@@ -613,7 +613,7 @@ public class APIResourceManagementDAOImplTest {
 
             // Expect server exception due to OrganizationManagementException.
             Assert.expectThrows(Exception.class, () ->
-                    daoImpl.deleteScope("dummy-value", TENANT_ID));
+                    daoImpl.deleteScopeById("dummy-value", "dummy-value", TENANT_ID));
         }
     }
 
@@ -634,7 +634,7 @@ public class APIResourceManagementDAOImplTest {
 
             // Expect server exception due to SQLException.
             Assert.expectThrows(APIResourceMgtException.class, () ->
-                    daoImpl.deleteScope("dummy-value", TENANT_ID));
+                    daoImpl.deleteScopeById("dummy-value", "dummy-value", TENANT_ID));
         }
     }
 
@@ -656,7 +656,65 @@ public class APIResourceManagementDAOImplTest {
 
             // Expect server exception due to SQLException.
             Assert.expectThrows(APIResourceMgtException.class, () ->
-                    daoImpl.deleteScope("dummy-value", TENANT_ID));
+                    daoImpl.deleteScopeById("dummy-value", "dummy-value", TENANT_ID));
+        }
+    }
+
+    @Test(priority = 17)
+    public void testUpdateScopeMetadataById() throws Exception {
+
+        String apiNamePostFix = "testUpdateScopeMetadataById";
+
+        try (MockedStatic<IdentityDatabaseUtil> identityDatabaseUtil = mockStatic(IdentityDatabaseUtil.class);
+             MockedStatic<OrganizationManagementUtil> organizationManagementUtil =
+                     mockStatic(OrganizationManagementUtil.class)) {
+
+            // Create API resource with scopes.
+            APIResource apiResource = addAPIResourceToDB(apiNamePostFix, getConnection(), TENANT_ID,
+                    identityDatabaseUtil, organizationManagementUtil);
+            Scope originalScope = apiResource.getScopes().get(0);
+
+            // Create updated scope with new metadata.
+            Scope updatedScope = new Scope.ScopeBuilder()
+                    .id(originalScope.getId())
+                    .name(originalScope.getName())
+                    .displayName("Updated Display Name")
+                    .description("Updated Description")
+                    .build();
+
+            Connection connection = getConnection();
+            identityDatabaseUtil.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+
+            // Update scope metadata.
+            daoImpl.updateScopeMetadataById(updatedScope, apiResource, TENANT_ID);
+
+            // Verify the scope metadata was updated
+            identityDatabaseUtil.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(getConnection());
+            Scope retrievedScope = daoImpl.getScopeByNameAndTenantId(originalScope.getName(), TENANT_ID);
+
+            Assert.assertNotNull(retrievedScope, "Retrieved scope should not be null");
+            Assert.assertEquals(retrievedScope.getDisplayName(), "Updated Display Name",
+                    "Display name should be updated");
+            Assert.assertEquals(retrievedScope.getDescription(), "Updated Description",
+                    "Description should be updated");
+        }
+    }
+
+    @Test(priority = 18)
+    public void testUpdateScopeMetadataByIdWithDatabaseCloseException() throws Exception {
+
+        try (MockedStatic<IdentityDatabaseUtil> identityDatabaseUtil = mockStatic(IdentityDatabaseUtil.class)) {
+            // Mock database connection that throws SQLException.
+            Connection connection = mock(Connection.class);
+            when(connection.prepareStatement(anyString())).thenThrow(SQLException.class);
+            identityDatabaseUtil.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+
+            // Expect server exception due to SQLException on close
+            Assert.expectThrows(APIResourceMgtException.class, () ->
+                    daoImpl.updateScopeMetadataById(null, null, TENANT_ID));
         }
     }
 
@@ -672,7 +730,7 @@ public class APIResourceManagementDAOImplTest {
         };
     }
 
-    @Test(dataProvider = "updateAPIResourceScopeAddition", priority = 18)
+    @Test(dataProvider = "updateAPIResourceScopeAddition", priority = 19)
     public void testUpdateAPIResourceScopeAddition(String type, int expectedValue)
             throws Exception {
 
