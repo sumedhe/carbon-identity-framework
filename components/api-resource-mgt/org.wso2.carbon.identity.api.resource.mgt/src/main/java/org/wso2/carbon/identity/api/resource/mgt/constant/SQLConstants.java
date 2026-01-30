@@ -186,6 +186,7 @@ public class SQLConstants {
     public static final String GET_SCOPES_BY_TENANT_ID_FOR_ORGANIZATIONS_TAIL = "(AR.TENANT_ID = ? OR AR.TENANT_ID " +
             "IS NULL) AND TYPE NOT IN ('TENANT', 'SYSTEM', 'CONSOLE_FEATURE')";
     public static final String DELETE_SCOPE_BY_NAME = "DELETE FROM SCOPE WHERE NAME = ? AND TENANT_ID = ?";
+    public static final String DELETE_SCOPE_BY_ID = "DELETE FROM SCOPE WHERE ID = ? AND TENANT_ID = ?";
     public static final String GET_API_RESOURCE_PROPERTIES_BY_API_ID = "SELECT ID, NAME, VALUE FROM " +
             "API_RESOURCE_PROPERTY WHERE API_ID = ?";
     public static final String GET_API_RESOURCE_PROPERTIES_BY_API_ID_H2 = "SELECT ID, NAME, `VALUE` FROM " +

@@ -215,6 +215,16 @@ public class APIResourceManagerImpl implements APIResourceManager {
     }
 
     @Override
+    public void deleteAPIScopeByScopeId(String apiResourceId, String scopeId, String tenantDomain)
+            throws APIResourceMgtException {
+
+        APIResourceManagerEventPublisherProxy publisherProxy = APIResourceManagerEventPublisherProxy.getInstance();
+        publisherProxy.publishPreDeleteAPIScopeByScopeIdWithException(apiResourceId, scopeId, tenantDomain);
+        CACHE_BACKED_DAO.deleteScope(scopeId, IdentityTenantUtil.getTenantId(tenantDomain));
+        publisherProxy.publishPostDeleteAPIScopeByScopeId(apiResourceId, scopeId, tenantDomain);
+    }
+
+    @Override
     public void putScopes(String apiResourceId, List<Scope> currentScopes, List<Scope> scopes, String tenantDomain)
             throws APIResourceMgtException {
 

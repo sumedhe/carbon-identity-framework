@@ -144,6 +144,20 @@ public interface APIResourceManager {
             throws APIResourceMgtException;
 
     /**
+     * Delete API scope by scope id.
+     *
+     * @param apiResourceId API resource id.
+     * @param scopeId       Scope id.
+     * @param tenantDomain  Tenant domain.
+     * @throws APIResourceMgtException If an error occurs while deleting API scope.
+     */
+    default void deleteAPIScopeByScopeId(String apiResourceId, String scopeId, String tenantDomain)
+            throws APIResourceMgtException {
+
+        // no implementation
+    }
+
+    /**
      * Patch scope by scope name.
      *
      * @param scope    Scope.

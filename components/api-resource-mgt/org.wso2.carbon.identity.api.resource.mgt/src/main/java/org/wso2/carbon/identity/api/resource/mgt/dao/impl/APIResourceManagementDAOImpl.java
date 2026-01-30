@@ -677,6 +677,28 @@ public class APIResourceManagementDAOImpl implements APIResourceManagementDAO {
     }
 
     @Override
+    public void deleteScope(String scopeId, Integer tenantId) throws APIResourceMgtException {
+
+        try {
+            if (OrganizationManagementUtil.isOrganization(tenantId)) {
+                throw APIResourceManagementUtil.handleClientException(APIResourceManagementConstants.ErrorMessages
+                        .ERROR_CODE_DELETING_SCOPES_NOT_SUPPORTED_FOR_ORGANIZATIONS);
+            }
+        } catch (OrganizationManagementException e) {
+            throw APIResourceManagementUtil.handleServerException(APIResourceManagementConstants.ErrorMessages.
+                            ERROR_CODE_ERROR_WHILE_RESOLVING_ORGANIZATION_FOR_TENANT, e,
+                    IdentityTenantUtil.getTenantDomain(tenantId));
+        }
+
+        try (Connection dbConnection = IdentityDatabaseUtil.getDBConnection(false)) {
+            deleteScopeById(dbConnection, scopeId, tenantId);
+        } catch (SQLException e) {
+            throw APIResourceManagementUtil.handleServerException(
+                    APIResourceManagementConstants.ErrorMessages.ERROR_CODE_ERROR_WHILE_DELETING_SCOPES, e);
+        }
+    }
+
+    @Override
     public void putScopes(String apiId, List<Scope> currentScopes, List<Scope> scopes, Integer tenantId)
             throws APIResourceMgtException {
 
@@ -1018,6 +1040,20 @@ public class APIResourceManagementDAOImpl implements APIResourceManagementDAO {
         try {
             PreparedStatement prepStmt = dbConnection.prepareStatement(SQLConstants.DELETE_SCOPE_BY_NAME);
             prepStmt.setString(1, scopeName);
+            prepStmt.setInt(2, tenantId);
+            prepStmt.executeUpdate();
+        } catch (SQLException e) {
+            throw APIResourceManagementUtil.handleServerException(
+                    APIResourceManagementConstants.ErrorMessages.ERROR_CODE_ERROR_WHILE_DELETING_SCOPES, e);
+        }
+    }
+
+    private void deleteScopeById(Connection dbConnection, String scopeId, Integer tenantId)
+            throws APIResourceMgtException {
+
+        try {
+            PreparedStatement prepStmt = dbConnection.prepareStatement(SQLConstants.DELETE_SCOPE_BY_ID);
+            prepStmt.setString(1, scopeId);
             prepStmt.setInt(2, tenantId);
             prepStmt.executeUpdate();
         } catch (SQLException e) {

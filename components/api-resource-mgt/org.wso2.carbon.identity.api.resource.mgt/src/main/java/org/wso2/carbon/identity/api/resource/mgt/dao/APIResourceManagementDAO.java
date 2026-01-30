@@ -241,6 +241,18 @@ public interface APIResourceManagementDAO {
     void deleteScope(String apiId, String scopeName, Integer tenantId) throws APIResourceMgtException;
 
     /**
+     * Delete the scope by given scope id.
+     *
+     * @param scopeId Scope id.
+     * @param tenantId Tenant Id.
+     * @throws APIResourceMgtException If an error occurs while deleting the scope.
+     */
+    default void deleteScope(String scopeId, Integer tenantId) throws APIResourceMgtException {
+
+        // no implementation.
+    }
+
+    /**
      * Put scopes to the given API resource.
      *
      * @param apiId         API resource id.

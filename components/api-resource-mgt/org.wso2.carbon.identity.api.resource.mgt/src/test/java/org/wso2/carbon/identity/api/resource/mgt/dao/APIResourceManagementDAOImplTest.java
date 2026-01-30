@@ -28,6 +28,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.wso2.carbon.identity.api.resource.mgt.APIResourceMgtClientException;
+import org.wso2.carbon.identity.api.resource.mgt.APIResourceMgtException;
 import org.wso2.carbon.identity.api.resource.mgt.constant.APIResourceManagementConstants;
 import org.wso2.carbon.identity.api.resource.mgt.dao.impl.APIResourceManagementDAOImpl;
 import org.wso2.carbon.identity.api.resource.mgt.internal.APIResourceManagementServiceComponentHolder;
@@ -42,6 +43,7 @@ import org.wso2.carbon.identity.organization.management.service.util.Organizatio
 
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,9 +56,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 public class APIResourceManagementDAOImplTest {
 
@@ -547,6 +551,116 @@ public class APIResourceManagementDAOImplTest {
     }
 
     @DataProvider
+    public Object[][] deleteScopeById() {
+        return new Object[][]{
+                {TENANT_ID, false, "testDeleteScopeById"},
+                {TENANT_ID, true, "testDeleteOrgScopeById"}
+        };
+    }
+
+    @Test(dataProvider = "deleteScopeById", priority = 14)
+    public void testDeleteScopeById(Integer deletingTenantId, boolean isOrganization, String apiNamePostFix)
+            throws Exception {
+
+        try (MockedStatic<IdentityDatabaseUtil> identityDatabaseUtil = mockStatic(IdentityDatabaseUtil.class);
+             MockedStatic<OrganizationManagementUtil> organizationManagementUtil =
+                     mockStatic(OrganizationManagementUtil.class)) {
+
+            APIResource apiResource =
+                    addAPIResourceToDB(apiNamePostFix, getConnection(), deletingTenantId, identityDatabaseUtil,
+                            organizationManagementUtil);
+            String apiId = apiResource.getId();
+            String scopeId = apiResource.getScopes().get(0).getId();
+
+            Connection connection = getConnection();
+            identityDatabaseUtil.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean())).thenReturn(connection);
+            identityDatabaseUtil.when(() -> IdentityDatabaseUtil.commitTransaction(any(Connection.class)))
+                    .thenAnswer((Answer<Void>) invocation -> {
+                        connection.commit();
+                        return null;
+                    });
+
+            organizationManagementUtil.when(() -> OrganizationManagementUtil.isOrganization(anyInt()))
+                    .thenReturn(isOrganization);
+            if (!isOrganization) {
+                // Testing the deleteScopeById method with the created API resource's ID and scope ID.
+                daoImpl.deleteScope(scopeId, deletingTenantId);
+
+                // Checking whether the scope is deleted.
+                identityDatabaseUtil.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                        .thenReturn(getConnection());
+                Assert.assertFalse(daoImpl.isScopeExistById(scopeId, deletingTenantId));
+            } else {
+                Assert.expectThrows(APIResourceMgtClientException.class, () ->
+                        daoImpl.deleteScope(scopeId, deletingTenantId));
+            }
+        }
+    }
+
+    @Test(priority = 15)
+    public void testDeleteScopeByIdWithOrganizationManagementException() throws Exception {
+
+        String apiNamePostFix = "testDeleteScopeByIdOrgMgtException";
+
+        try (MockedStatic<IdentityTenantUtil> identityTenantUtil = mockStatic(IdentityTenantUtil.class);
+             MockedStatic<OrganizationManagementUtil> organizationManagementUtil =
+                     mockStatic(OrganizationManagementUtil.class)) {
+            when(IdentityTenantUtil.getTenantDomain(anyInt())).thenReturn("test-domain");
+
+            // Mock OrganizationManagementUtil to throw OrganizationManagementException.
+            organizationManagementUtil.when(() -> OrganizationManagementUtil.isOrganization(anyInt()))
+                    .thenThrow(new OrganizationManagementException("Organization management error"));
+
+            // Expect server exception due to OrganizationManagementException.
+            Assert.expectThrows(Exception.class, () ->
+                    daoImpl.deleteScope("dummy-value", TENANT_ID));
+        }
+    }
+
+    @Test(priority = 16)
+    public void testDeleteScopeByIdWithDatabaseException() throws Exception {
+
+        try (MockedStatic<IdentityDatabaseUtil> identityDatabaseUtil = mockStatic(IdentityDatabaseUtil.class);
+             MockedStatic<OrganizationManagementUtil> organizationManagementUtil =
+                     mockStatic(OrganizationManagementUtil.class)) {
+
+            // Mock database connection to throw SQLException.
+            organizationManagementUtil.when(() -> OrganizationManagementUtil.isOrganization(anyInt()))
+                    .thenReturn(false);
+            Connection connection = mock(Connection.class);
+            when(connection.prepareStatement(anyString())).thenThrow(SQLException.class);
+            identityDatabaseUtil.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+
+            // Expect server exception due to SQLException.
+            Assert.expectThrows(APIResourceMgtException.class, () ->
+                    daoImpl.deleteScope("dummy-value", TENANT_ID));
+        }
+    }
+
+    @Test(priority = 16)
+    public void testDeleteScopeByIdWithDatabaseCloseException() throws Exception {
+
+        try (MockedStatic<IdentityDatabaseUtil> identityDatabaseUtil = mockStatic(IdentityDatabaseUtil.class);
+             MockedStatic<OrganizationManagementUtil> organizationManagementUtil =
+                     mockStatic(OrganizationManagementUtil.class)) {
+
+            // Mock database connection to throw SQLException.
+            organizationManagementUtil.when(() -> OrganizationManagementUtil.isOrganization(anyInt()))
+                    .thenReturn(false);
+            Connection connection = mock(Connection.class);
+            when(connection.prepareStatement(anyString())).thenReturn(mock(PreparedStatement.class));
+            doThrow(new SQLException()).when(connection).close();
+            identityDatabaseUtil.when(() -> IdentityDatabaseUtil.getDBConnection(anyBoolean()))
+                    .thenReturn(connection);
+
+            // Expect server exception due to SQLException.
+            Assert.expectThrows(APIResourceMgtException.class, () ->
+                    daoImpl.deleteScope("dummy-value", TENANT_ID));
+        }
+    }
+
+    @DataProvider
     public Object[][] updateAPIResourceScopeAddition() {
 
         return new Object[][]{
@@ -558,7 +672,7 @@ public class APIResourceManagementDAOImplTest {
         };
     }
 
-    @Test(dataProvider = "updateAPIResourceScopeAddition", priority = 14)
+    @Test(dataProvider = "updateAPIResourceScopeAddition", priority = 18)
     public void testUpdateAPIResourceScopeAddition(String type, int expectedValue)
             throws Exception {
 
