@@ -154,6 +154,14 @@ public interface APIResourceManagementDAO {
         // no implementation
     }
 
+    /**
+     * Update scope metadata by scope id.
+     *
+     * @param scope       Scope.
+     * @param apiResource API resource.
+     * @param tenantId    Tenant Id.
+     * @throws APIResourceMgtException If an error occurs while updating the API resource.
+     */
     default void updateScopeMetadataById(Scope scope, APIResource apiResource, Integer tenantId)
             throws APIResourceMgtException {
 
