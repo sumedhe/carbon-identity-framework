@@ -97,7 +97,7 @@ public class CacheBackedAuthenticatorMgtDAO implements AuthenticatorManagementDA
         UserDefinedLocalAuthenticatorConfig authenticatorConfig = authenticatorMgtFacade
                 .getUserDefinedLocalAuthenticator(authenticatorConfigName, tenantId);
 
-        authenticatorCache.addToCache(cacheKey, new AuthenticatorCacheEntry(authenticatorConfig), tenantId);
+        authenticatorCache.addToCacheOnRead(cacheKey, new AuthenticatorCacheEntry(authenticatorConfig), tenantId);
         if (LOG.isDebugEnabled()) {
             LOG.debug(String.format(
                     "Entry fetched from DB for authenticator %s. Adding cache entry.", authenticatorConfigName));

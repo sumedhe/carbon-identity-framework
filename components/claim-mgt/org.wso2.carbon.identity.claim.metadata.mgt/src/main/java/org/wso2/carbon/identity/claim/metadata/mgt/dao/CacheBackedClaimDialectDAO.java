@@ -48,7 +48,7 @@ public class CacheBackedClaimDialectDAO extends ClaimDialectDAO {
         }
 
         claimDialectList = super.getClaimDialects(tenantId);
-        claimDialectCache.putClaimDialects(tenantId, claimDialectList);
+        claimDialectCache.putClaimDialectsOnRead(tenantId, claimDialectList);
 
         if (log.isDebugEnabled()) {
             log.debug("Cache miss for claim dialect list for tenant: " + tenantId + ". Updated cache with claim " +

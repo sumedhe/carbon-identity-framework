@@ -147,6 +147,46 @@ public class AuthenticationContextCache extends
     }
 
     /**
+     * Add a cache entry during a READ operation.
+     * <p>
+     * This populates the cache only if the key does not already have a value.
+     * If a value already exists, the cache is left unchanged, which avoids
+     * unnecessary cache invalidation broadcasts in clustered environments.
+     *
+     * @param key   Key which the cache entry is indexed by.
+     * @param entry Value to be stored in the cache.
+     */
+    public void addToCacheOnRead(AuthenticationContextCacheKey key, AuthenticationContextCacheEntry entry) {
+
+        super.addToCacheOnRead(key, entry);
+        if (isTemporarySessionDataPersistEnabled) {
+            int tenantId = MultitenantConstants.INVALID_TENANT_ID;
+            String tenantDomain = entry.getContext().getTenantDomain();
+            if (tenantDomain != null) {
+                tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+            }
+
+            if (entry.getContext() != null && entry.getContext().getProperties() != null) {
+                Iterator it = entry.getContext().getProperties().entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<String, Object> item = (Map.Entry<String, Object>) it.next();
+                    if (!(item.getValue() instanceof Serializable)) {
+                        it.remove();
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    String message = "[AddToCacheOnRead][ Context Id : " + key.getContextId() +
+                            ", Cache type : " + AUTHENTICATION_CONTEXT_CACHE_NAME +
+                            ", Operation : STORE ]";
+                    log.debug("[AddToCacheOnRead]Authentication context is stored with details " + message);
+                }
+                SessionDataStore.getInstance().storeSessionData(key.getContextId(), AUTHENTICATION_CONTEXT_CACHE_NAME,
+                        entry, tenantId);
+            }
+        }
+    }
+
+    /**
      * Retrieves a cache entry.
      *
      * @param key CacheKey
@@ -167,7 +207,7 @@ public class AuthenticationContextCache extends
             }
 
             // Update the cache again with the new value.
-            super.addToCache(key, entry);
+            super.addToCacheOnRead(key, entry);
         }
         if (entry != null) {
             try {
