@@ -162,6 +162,9 @@ public class UserProfileAdmin extends AbstractAdmin {
             admin.setUserClaimValues(username, map, profile.getProfileName());
 
         } catch (UserStoreException e) {
+            if (isUserClaimUpdateWorkflowTriggered(e)) {
+                return;
+            }
             // Not logging. Already logged.
             throw new UserProfileException(e.getMessage(), e);
         } catch (Exception e) {
@@ -994,5 +997,12 @@ public class UserProfileAdmin extends AbstractAdmin {
             String msg = "Error while resolving identity provider";
             throw new UserProfileException(msg);
         }
+    }
+
+    private boolean isUserClaimUpdateWorkflowTriggered(UserStoreException e) {
+
+        return e instanceof org.wso2.carbon.user.core.UserStoreException &&
+                (UserCoreConstants.ErrorCode.USER_CLAIMS_UPDATE_WORKFLOW_CREATED
+                        .equals(((org.wso2.carbon.user.core.UserStoreException) e).getErrorCode()));
     }
 }
