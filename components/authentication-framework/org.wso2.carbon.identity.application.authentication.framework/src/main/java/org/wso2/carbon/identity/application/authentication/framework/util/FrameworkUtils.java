@@ -1267,7 +1267,7 @@ public class FrameworkUtils {
             cacheEntry.setLoggedInUser(authenticatedUser.getAuthenticatedSubjectIdentifier());
         }
         cacheEntry.setContext(sessionContext);
-        SessionContextCache.getInstance().addToCacheOnRead(cacheKey, cacheEntry, getLoginTenantDomainFromContext());
+        SessionContextCache.getInstance().addToCache(cacheKey, cacheEntry, getLoginTenantDomainFromContext());
     }
 
     @Deprecated
@@ -1312,7 +1312,7 @@ public class FrameworkUtils {
 
         cacheEntry.setContext(sessionContext);
         cacheEntry.setValidityPeriod(timeoutPeriod);
-        SessionContextCache.getInstance().addToCacheOnRead(cacheKey, cacheEntry, loginTenantDomain);
+        SessionContextCache.getInstance().addToCache(cacheKey, cacheEntry, loginTenantDomain);
     }
 
     /**

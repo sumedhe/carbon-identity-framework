@@ -57,7 +57,7 @@ public class ClaimDialectCache extends BaseCache<Integer, Serializable> {
 
     public void putClaimDialectsOnRead(int tenantId, List<ClaimDialect> claimDialectList) {
 
-        super.addToCacheOnRead(tenantId, (Serializable) claimDialectList);
+        super.addToCacheOnRead(tenantId, (Serializable) claimDialectList, tenantId);
     }
 
     public void clearClaimDialects(int tenantId) {
