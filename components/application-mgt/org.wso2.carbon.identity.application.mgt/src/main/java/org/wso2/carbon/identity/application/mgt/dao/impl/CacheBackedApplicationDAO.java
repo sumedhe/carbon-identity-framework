@@ -630,7 +630,8 @@ public class CacheBackedApplicationDAO extends ApplicationDAOImpl {
         TrustedAppPlatformTypeCacheKey cacheKey = new TrustedAppPlatformTypeCacheKey(platformType);
         TrustedAppPlatformTypeCacheEntry cacheEntry = new TrustedAppPlatformTypeCacheEntry(trustedApps);
         // Trusted apps are retrieved regardless of the tenant domain. Therefore, it is added to the super tenant cache.
-        trustedAppByPlatformTypeCache.addToCacheOnRead(cacheKey, cacheEntry, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        trustedAppByPlatformTypeCache.addToCacheOnRead(cacheKey, cacheEntry,
+                MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
     }
 
     private ServiceProvider getApplicationFromCache(int appId, String tenantDomain) {
