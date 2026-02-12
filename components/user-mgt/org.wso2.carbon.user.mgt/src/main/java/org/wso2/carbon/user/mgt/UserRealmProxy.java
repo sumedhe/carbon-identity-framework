@@ -924,6 +924,9 @@ public class UserRealmProxy {
             log.error(msg, e);
             throw new UserAdminException(msg, e);
         } catch (UserStoreException e) {
+            if (UserCoreConstants.ErrorCode.USER_DELETION_WORKFLOW_CREATED.equals(e.getErrorCode())) {
+                return;
+            }
             log.error(e.getMessage(), e);
             throw new UserAdminException(e.getMessage(), e);
         } catch (Exception e) {
