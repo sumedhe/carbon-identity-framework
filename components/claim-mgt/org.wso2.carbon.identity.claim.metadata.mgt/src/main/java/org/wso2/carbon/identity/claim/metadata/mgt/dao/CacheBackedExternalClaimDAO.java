@@ -58,7 +58,7 @@ public class CacheBackedExternalClaimDAO {
                         tenantId);
             }
             externalClaimList = externalClaimDAO.getExternalClaims(externalDialectURI, tenantId);
-            externalClaimCache.addToCache(cacheKey, new ArrayList<>(externalClaimList), tenantId);
+            externalClaimCache.addToCacheOnRead(cacheKey, new ArrayList<>(externalClaimList), tenantId);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Cache hit for external claim list for dialect: " + externalDialectURI + " in tenant: " +
