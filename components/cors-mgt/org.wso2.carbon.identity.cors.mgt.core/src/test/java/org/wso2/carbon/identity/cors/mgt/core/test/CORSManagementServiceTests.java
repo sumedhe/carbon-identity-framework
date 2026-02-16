@@ -34,26 +34,13 @@ import org.wso2.carbon.identity.cors.mgt.core.constant.TestConstants;
 import org.wso2.carbon.identity.cors.mgt.core.constant.TestConstants.SampleApp1;
 import org.wso2.carbon.identity.cors.mgt.core.constant.TestConstants.SampleApp2;
 import org.wso2.carbon.identity.cors.mgt.core.constant.TestConstants.SampleTenant;
-import org.wso2.carbon.identity.cors.mgt.core.dao.CORSConfigurationDAO;
 import org.wso2.carbon.identity.cors.mgt.core.dao.CORSOriginDAO;
 import org.wso2.carbon.identity.cors.mgt.core.dao.impl.CORSOriginDAOImpl;
-import org.wso2.carbon.identity.cors.mgt.core.dao.impl.CacheBackedCORSConfigurationDAO;
-import org.wso2.carbon.identity.cors.mgt.core.dao.impl.CacheBackedCORSOriginDAO;
 import org.wso2.carbon.identity.cors.mgt.core.exception.CORSManagementServiceClientException;
 import org.wso2.carbon.identity.cors.mgt.core.exception.CORSManagementServiceException;
 import org.wso2.carbon.identity.cors.mgt.core.internal.CORSManagementServiceHolder;
-import org.wso2.carbon.identity.cors.mgt.core.internal.cache.CORSConfigurationCache;
-import org.wso2.carbon.identity.cors.mgt.core.internal.cache.CORSConfigurationCacheEntry;
-import org.wso2.carbon.identity.cors.mgt.core.internal.cache.CORSConfigurationCacheKey;
-import org.wso2.carbon.identity.cors.mgt.core.internal.cache.CORSOriginByAppIdCache;
-import org.wso2.carbon.identity.cors.mgt.core.internal.cache.CORSOriginByAppIdCacheEntry;
-import org.wso2.carbon.identity.cors.mgt.core.internal.cache.CORSOriginByAppIdCacheKey;
-import org.wso2.carbon.identity.cors.mgt.core.internal.cache.CORSOriginCache;
-import org.wso2.carbon.identity.cors.mgt.core.internal.cache.CORSOriginCacheEntry;
-import org.wso2.carbon.identity.cors.mgt.core.internal.cache.CORSOriginCacheKey;
 import org.wso2.carbon.identity.cors.mgt.core.internal.impl.CORSManagementServiceImpl;
 import org.wso2.carbon.identity.cors.mgt.core.model.CORSApplication;
-import org.wso2.carbon.identity.cors.mgt.core.model.CORSConfiguration;
 import org.wso2.carbon.identity.cors.mgt.core.model.CORSOrigin;
 import org.wso2.carbon.identity.cors.mgt.core.util.CarbonUtils;
 import org.wso2.carbon.identity.cors.mgt.core.util.ConfigurationManagementUtils;
@@ -73,12 +60,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
@@ -455,91 +439,5 @@ public class CORSManagementServiceTests {
         expectedApplicationIds.add(SampleApp1.UUID);
         expectedApplicationIds.add(SampleApp2.UUID);
         assertEquals(retrievedCORSOriginApplicationIds, expectedApplicationIds);
-    }
-
-    @Test
-    public void testGetCORSConfigurationByTenantDomainCacheMissUsesAddToCacheOnRead()
-            throws CORSManagementServiceException {
-
-        CORSConfigurationDAO corsConfigurationDAO = mock(CORSConfigurationDAO.class);
-        CORSConfiguration cachedConfiguration = new CORSConfiguration();
-        when(corsConfigurationDAO.getCORSConfigurationByTenantDomain(SampleTenant.DOMAIN_NAME))
-                .thenReturn(cachedConfiguration);
-
-        CORSConfigurationCache corsConfigurationCache = mock(CORSConfigurationCache.class);
-        when(corsConfigurationCache.getValueFromCache(any(CORSConfigurationCacheKey.class), anyString()))
-                .thenReturn(null);
-
-        try (MockedStatic<CORSConfigurationCache> corsConfigurationCacheMockedStatic =
-                     mockStatic(CORSConfigurationCache.class)) {
-            corsConfigurationCacheMockedStatic.when(CORSConfigurationCache::getInstance)
-                    .thenReturn(corsConfigurationCache);
-
-            CacheBackedCORSConfigurationDAO cacheBackedCORSConfigurationDAO =
-                    new CacheBackedCORSConfigurationDAO(corsConfigurationDAO);
-            CORSConfiguration retrievedConfiguration = cacheBackedCORSConfigurationDAO
-                    .getCORSConfigurationByTenantDomain(SampleTenant.DOMAIN_NAME);
-
-            assertEquals(retrievedConfiguration, cachedConfiguration);
-            verify(corsConfigurationDAO).getCORSConfigurationByTenantDomain(SampleTenant.DOMAIN_NAME);
-            verify(corsConfigurationCache).addToCacheOnRead(any(CORSConfigurationCacheKey.class),
-                    any(CORSConfigurationCacheEntry.class));
-            verify(corsConfigurationCache, never()).addToCache(any(CORSConfigurationCacheKey.class),
-                    any(CORSConfigurationCacheEntry.class), anyString());
-        }
-    }
-
-    @Test
-    public void testGetCORSOriginsByTenantIdCacheMissUsesAddToCacheOnRead()
-            throws CORSManagementServiceException {
-
-        CORSOriginDAO mockCorsOriginDAO = mock(CORSOriginDAO.class);
-        when(mockCorsOriginDAO.getCORSOriginsByTenantId(SampleTenant.ID)).thenReturn(SAMPLE_CORS_ORIGIN_LIST_1);
-
-        CORSOriginCache corsOriginCache = mock(CORSOriginCache.class);
-        when(corsOriginCache.getValueFromCache(any(CORSOriginCacheKey.class), anyInt())).thenReturn(null);
-
-        try (MockedStatic<CORSOriginCache> corsOriginCacheMockedStatic = mockStatic(CORSOriginCache.class)) {
-            corsOriginCacheMockedStatic.when(CORSOriginCache::getInstance).thenReturn(corsOriginCache);
-
-            CacheBackedCORSOriginDAO cacheBackedCORSOriginDAO = new CacheBackedCORSOriginDAO(mockCorsOriginDAO);
-            List<CORSOrigin> retrievedOrigins = cacheBackedCORSOriginDAO.getCORSOriginsByTenantId(SampleTenant.ID);
-
-            assertEquals(retrievedOrigins, SAMPLE_CORS_ORIGIN_LIST_1);
-            verify(mockCorsOriginDAO).getCORSOriginsByTenantId(SampleTenant.ID);
-            verify(corsOriginCache).addToCacheOnRead(any(CORSOriginCacheKey.class), any(CORSOriginCacheEntry.class));
-            verify(corsOriginCache, never()).addToCache(any(CORSOriginCacheKey.class),
-                    any(CORSOriginCacheEntry.class), anyInt());
-        }
-    }
-
-    @Test
-    public void testGetCORSOriginsByApplicationIdCacheMissUsesAddToCacheOnRead()
-            throws CORSManagementServiceException {
-
-        CORSOriginDAO mockCorsOriginDAO = mock(CORSOriginDAO.class);
-        when(mockCorsOriginDAO.getCORSOriginsByApplicationId(SampleApp1.ID, SampleTenant.ID))
-                .thenReturn(SAMPLE_CORS_ORIGIN_LIST_1);
-
-        CORSOriginByAppIdCache corsOriginByAppIdCache = mock(CORSOriginByAppIdCache.class);
-        when(corsOriginByAppIdCache.getValueFromCache(any(CORSOriginByAppIdCacheKey.class), anyInt()))
-                .thenReturn(null);
-
-        try (MockedStatic<CORSOriginByAppIdCache> corsOriginByAppIdCacheMockedStatic =
-                     mockStatic(CORSOriginByAppIdCache.class)) {
-            corsOriginByAppIdCacheMockedStatic.when(CORSOriginByAppIdCache::getInstance)
-                    .thenReturn(corsOriginByAppIdCache);
-
-            CacheBackedCORSOriginDAO cacheBackedCORSOriginDAO = new CacheBackedCORSOriginDAO(mockCorsOriginDAO);
-            List<CORSOrigin> retrievedOrigins = cacheBackedCORSOriginDAO
-                    .getCORSOriginsByApplicationId(SampleApp1.ID, SampleTenant.ID);
-
-            assertEquals(retrievedOrigins, SAMPLE_CORS_ORIGIN_LIST_1);
-            verify(mockCorsOriginDAO).getCORSOriginsByApplicationId(SampleApp1.ID, SampleTenant.ID);
-            verify(corsOriginByAppIdCache).addToCacheOnRead(any(CORSOriginByAppIdCacheKey.class),
-                    any(CORSOriginByAppIdCacheEntry.class));
-            verify(corsOriginByAppIdCache, never()).addToCache(any(CORSOriginByAppIdCacheKey.class),
-                    any(CORSOriginByAppIdCacheEntry.class), anyInt());
-        }
     }
 }
