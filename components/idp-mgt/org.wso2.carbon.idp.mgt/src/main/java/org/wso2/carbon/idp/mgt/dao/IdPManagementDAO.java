@@ -3442,14 +3442,17 @@ public class IdPManagementDAO {
             rs = prepStmt.executeQuery();
             int idpId = -1;
             String idPName = "";
+            String idpResourceId = "";
 
             if (rs.next()) {
                 federatedIdp = new IdentityProvider();
 
                 idpId = rs.getInt("ID");
                 idPName = rs.getString("NAME");
+                idpResourceId = rs.getString("UUID");
 
                 federatedIdp.setIdentityProviderName(idPName);
+                federatedIdp.setResourceId(idpResourceId);
 
                 if ((IdPManagementConstants.IS_TRUE_VALUE).equals(rs.getString("IS_PRIMARY"))) {
                     federatedIdp.setPrimary(true);
@@ -3608,14 +3611,17 @@ public class IdPManagementDAO {
             rs = prepStmt.executeQuery();
             int idpId = -1;
             String idPName = "";
+            String idpResourceId = "";
 
             if (rs.next()) {
                 federatedIdp = new IdentityProvider();
 
                 idpId = rs.getInt("ID");
                 idPName = rs.getString("NAME");
+                idpResourceId = rs.getString("UUID");
 
                 federatedIdp.setIdentityProviderName(idPName);
+                federatedIdp.setResourceId(idpResourceId);
 
                 if ((IdPManagementConstants.IS_TRUE_VALUE).equals(rs.getString("IS_PRIMARY"))) {
                     federatedIdp.setPrimary(true);
