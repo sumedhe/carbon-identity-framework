@@ -120,8 +120,7 @@ public class SessionContextCache extends BaseCache<SessionContextCacheKey, Sessi
 
         if (log.isDebugEnabled()) {
             log.debug("Adding session context corresponding to the key : " + key.getContextId() +
-                    " with accessed time " + entry.getAccessedTime() + " and validity time " +
-                    entry.getValidityPeriod());
+                    " with accessed time " + entry.getAccessedTime() + " and validity time " + entry.getValidityPeriod());
         }
         entry.setAccessedTime();
         super.addToCacheOnRead(key, entry, resolveLoginTenantDomain(loginTenantDomain));
