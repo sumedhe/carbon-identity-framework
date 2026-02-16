@@ -138,7 +138,7 @@ public class CacheBackedAuthorizedAPIDAOImpl implements AuthorizedAPIDAO {
         if (StringUtils.isNotBlank(appId)) {
             AuthorizedAPICacheKey cacheKey = new AuthorizedAPICacheKey(appId, apiId);
             AuthorizedAPICacheEntry cacheEntry = new AuthorizedAPICacheEntry(authorizedAPI);
-            authorizedAPICache.addToCacheOnRead(cacheKey, cacheEntry, tenantId);
+            authorizedAPICache.addToCache(cacheKey, cacheEntry, tenantId);
         } else {
             LOG.debug("Application id is empty. Cannot add authorized APIs to cache.");
         }

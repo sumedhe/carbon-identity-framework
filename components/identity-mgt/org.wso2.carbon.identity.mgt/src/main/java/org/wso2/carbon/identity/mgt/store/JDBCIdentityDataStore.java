@@ -216,7 +216,7 @@ public class JDBCIdentityDataStore extends InMemoryIdentityDataStore {
             dto = new UserIdentityClaimsDO(userName, data);
             dto.setTenantId(tenantId);
             try {
-                super.storeOnRead(dto, userStoreManager);
+                super.store(dto, userStoreManager);
             } catch (IdentityException e) {
                 log.error("Error while reading user identity data", e);
             }
