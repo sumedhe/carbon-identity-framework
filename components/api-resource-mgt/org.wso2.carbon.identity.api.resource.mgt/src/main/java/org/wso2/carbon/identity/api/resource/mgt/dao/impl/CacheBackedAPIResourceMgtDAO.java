@@ -158,11 +158,11 @@ public class CacheBackedAPIResourceMgtDAO implements APIResourceManagementDAO {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Entry fetched from DB for API Resource " + apiId + ". Updating cache");
             }
-            apiResourceCacheById.addToCacheOnRead(cacheKey, new APIResourceCacheEntry(apiResource), tenantId);
+            apiResourceCacheById.addToCache(cacheKey, new APIResourceCacheEntry(apiResource), tenantId);
             if (apiResource.getIdentifier() != null) {
                 APIResourceIdentifierCacheKey apiResourceIdentifierCacheKey = new APIResourceIdentifierCacheKey(
                         apiResource.getIdentifier());
-                apiResourceCacheByIdentifier.addToCacheOnRead(apiResourceIdentifierCacheKey,
+                apiResourceCacheByIdentifier.addToCache(apiResourceIdentifierCacheKey,
                         new APIResourceCacheEntry(apiResource), tenantId);
             }
         } else {
@@ -198,10 +198,10 @@ public class CacheBackedAPIResourceMgtDAO implements APIResourceManagementDAO {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Entry fetched from DB for API Resource " + identifier + ". Updating cache");
             }
-            apiResourceCacheByIdentifier.addToCacheOnRead(cacheKey, new APIResourceCacheEntry(apiResource), tenantId);
+            apiResourceCacheByIdentifier.addToCache(cacheKey, new APIResourceCacheEntry(apiResource), tenantId);
             if (apiResource.getId() != null) {
                 APIResourceIdCacheKey apiResourceIdCacheKey = new APIResourceIdCacheKey(apiResource.getId());
-                apiResourceCacheById.addToCacheOnRead(apiResourceIdCacheKey,
+                apiResourceCacheById.addToCache(apiResourceIdCacheKey,
                         new APIResourceCacheEntry(apiResource), tenantId);
             }
         } else {

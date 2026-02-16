@@ -132,7 +132,7 @@ public class CacheBackedProvisioningMgtDAO {
 
                 entry = new ProvisioningEntityCacheEntry();
                 entry.setProvisioningEntity(cachedProvisioningEntity);
-                provisioningEntityCache.addToCacheOnRead(cacheKey, entry, tenantDomain);
+                provisioningEntityCache.addToCache(cacheKey, entry, tenantDomain);
 
                 return provisionedIdentifier;
             } else {

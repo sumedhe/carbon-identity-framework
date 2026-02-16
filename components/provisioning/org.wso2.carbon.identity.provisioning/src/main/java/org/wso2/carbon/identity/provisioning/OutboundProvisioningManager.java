@@ -237,7 +237,7 @@ public class OutboundProvisioningManager {
 
         entry = new ServiceProviderProvisioningConnectorCacheEntry();
         entry.setConnectors(connectors);
-        ServiceProviderProvisioningConnectorCache.getInstance().addToCacheOnRead(key, entry, tenantDomain);
+        ServiceProviderProvisioningConnectorCache.getInstance().addToCache(key, entry, tenantDomain);
 
         if (log.isDebugEnabled()) {
             log.debug("Entry added successfully ");
