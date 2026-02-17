@@ -1569,15 +1569,12 @@
             </Feature>
             <Update>
                 <Scope name="internal_org_application_mgt_update"/>
-                <Scope name="internal_org_secret_mgt_update"/>
             </Update>
             <Delete>
                 <Scope name="internal_org_application_mgt_delete"/>
-                <Scope name="internal_org_secret_mgt_delete"/>
             </Delete>
             <Create>
                 <Scope name="internal_org_application_mgt_create"/>
-                <Scope name="internal_org_secret_mgt_add"/>
             </Create>
             <Read>
                 <Scope name="internal_org_application_mgt_view"/>
@@ -1585,7 +1582,6 @@
                 <Scope name="internal_org_role_mgt_view"/>
                 <Scope name="internal_org_userstore_view"/>
                 <Scope name="internal_org_idp_view"/>
-                <Scope name="internal_org_secret_mgt_view"/>
             </Read>
         </Scopes>
     </APIResourceCollection>
