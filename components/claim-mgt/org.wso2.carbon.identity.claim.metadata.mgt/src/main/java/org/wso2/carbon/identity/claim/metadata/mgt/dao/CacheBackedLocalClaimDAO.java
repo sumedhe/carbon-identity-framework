@@ -57,7 +57,7 @@ public class CacheBackedLocalClaimDAO {
                 log.debug("Cache miss for local claim list for tenant: " + tenantId);
             }
             localClaimList = localClaimDAO.getLocalClaims(tenantId);
-            localClaimInvalidationCache.addToCache(tenantId, new ArrayList<>(localClaimList), tenantId);
+            localClaimInvalidationCache.addToCacheOnRead(tenantId, new ArrayList<>(localClaimList), tenantId);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("Cache hit for local claim list for tenant: " + tenantId);
@@ -139,7 +139,7 @@ public class CacheBackedLocalClaimDAO {
                         localClaimURI, tenantId));
             }
             associatedLocalClaims = localClaimDAO.fetchMappedExternalClaims(localClaimURI, tenantId);
-            associatedClaimCache.addToCache(localClaimURI, new ArrayList<>(associatedLocalClaims), tenantId);
+            associatedClaimCache.addToCacheOnRead(localClaimURI, new ArrayList<>(associatedLocalClaims), tenantId);
         } else {
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Cache hit for associated claims of local claim:%s in tenant:%s ",

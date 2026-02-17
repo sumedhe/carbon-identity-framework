@@ -64,6 +64,29 @@ public class IdentityContextCache extends AuthenticationBaseCache<String, Identi
         }
     }
 
+    /**
+     * Add a cache entry during a READ operation.
+     * <p>
+     * This populates the cache only if the key does not already have a value.
+     * If a value already exists, the cache is left unchanged, which avoids
+     * unnecessary cache invalidation broadcasts in clustered environments.
+     *
+     * @param key   Key which the cache entry is indexed by.
+     * @param context IdentityMessageContext.
+     */
+    public void addToCacheOnRead(String key, IdentityMessageContext context) {
+
+        super.addToCacheOnRead(key, context);
+        if (enableRequestScopeCache) {
+            int tenantId = MultitenantConstants.INVALID_TENANT_ID;
+            String tenantDomain = context.getRequest().getTenantDomain();
+            if (tenantDomain != null) {
+                tenantId = IdentityTenantUtil.getTenantId(tenantDomain);
+            }
+            SessionDataStore.getInstance().storeSessionData(key, INBOUND_CONTEXT_CACHE_NAME, context, tenantId);
+        }
+    }
+
     public IdentityMessageContext getValueFromCache(String key) {
         IdentityMessageContext context = super.getValueFromCache(key);
         if (context == null && enableRequestScopeCache) {
