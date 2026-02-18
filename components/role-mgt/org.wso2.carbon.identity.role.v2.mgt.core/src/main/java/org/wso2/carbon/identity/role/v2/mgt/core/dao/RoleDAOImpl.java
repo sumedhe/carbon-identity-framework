@@ -587,7 +587,7 @@ public class RoleDAOImpl implements RoleDAO {
                 if (resultSet.next()) {
                     roleBasicInfo.setRoleId(resultSet.getInt(1));
                     String roleName = resultSet.getString(2);
-                    roleBasicInfo.setName(RoleManagementUtils.removeInternalDomain(roleName));
+                    roleBasicInfo.setName(removeInternalDomain(roleName));
                     roleBasicInfo.setAudienceId(resultSet.getString(3));
                     roleBasicInfo.setAudience(resultSet.getString(4));
                 }
