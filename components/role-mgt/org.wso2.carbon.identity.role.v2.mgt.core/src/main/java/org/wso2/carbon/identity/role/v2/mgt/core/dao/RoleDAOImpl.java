@@ -58,6 +58,7 @@ import org.wso2.carbon.identity.role.v2.mgt.core.model.RoleDTO;
 import org.wso2.carbon.identity.role.v2.mgt.core.model.RoleProperty;
 import org.wso2.carbon.identity.role.v2.mgt.core.model.UserBasicInfo;
 import org.wso2.carbon.identity.role.v2.mgt.core.util.GroupIDResolver;
+import org.wso2.carbon.identity.role.v2.mgt.core.util.RoleManagementUtils;
 import org.wso2.carbon.identity.role.v2.mgt.core.util.UserIDResolver;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.user.api.RealmConfiguration;
@@ -587,7 +588,7 @@ public class RoleDAOImpl implements RoleDAO {
                 if (resultSet.next()) {
                     roleBasicInfo.setRoleId(resultSet.getInt(1));
                     String roleName = resultSet.getString(2);
-                    roleBasicInfo.setName(RoleManagementUtils.removeInternalDomain(roleName));
+                    roleBasicInfo.setName(removeInternalDomain(roleName));
                     roleBasicInfo.setAudienceId(resultSet.getString(3));
                     roleBasicInfo.setAudience(resultSet.getString(4));
                 }
