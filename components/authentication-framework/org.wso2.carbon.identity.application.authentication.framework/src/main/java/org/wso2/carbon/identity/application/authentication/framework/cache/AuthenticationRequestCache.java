@@ -97,7 +97,7 @@ public class AuthenticationRequestCache extends
      */
     public void addToCacheOnRead(AuthenticationRequestCacheKey key, AuthenticationRequestCacheEntry entry) {
 
-        super.addToCacheOnRead(key,entry);
+        super.addToCacheOnRead(key, entry);
         if (isTemporarySessionDataPersistEnabled) {
             int tenantId = MultitenantConstants.INVALID_TENANT_ID;
             String tenantDomain = entry.getAuthenticationRequest().getTenantDomain();
