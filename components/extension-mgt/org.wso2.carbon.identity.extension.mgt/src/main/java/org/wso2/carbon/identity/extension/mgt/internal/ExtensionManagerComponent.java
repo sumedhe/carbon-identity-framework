@@ -131,9 +131,7 @@ public class ExtensionManagerComponent {
 
             // Check whether the given extension type directory exists.
             if (!Files.exists(path) || !Files.isDirectory(path)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Default templates directory does not exist: " + path);
-                }
+                log.error("Default templates directory does not exist: " + path);
                 continue;
             }
 
