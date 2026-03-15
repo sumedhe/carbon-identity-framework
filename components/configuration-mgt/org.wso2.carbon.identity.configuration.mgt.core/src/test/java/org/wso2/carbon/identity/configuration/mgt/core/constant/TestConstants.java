@@ -25,6 +25,7 @@ public class TestConstants {
     public static final String SAMPLE_RESOURCE_TYPE_DESCRIPTION = "Sample resource type description";
     public static final String SAMPLE_RESOURCE_NAME1 = "email-resource";
     public static final String SAMPLE_RESOURCE_NAME2 = "publisher-resource";
+    public static final String SAMPLE_RESOURCE_NAME3 = "test-resource";
     public static final String SAMPLE_ATTRIBUTE_NAME1 = "from";
     public static final String SAMPLE_ATTRIBUTE_VALUE1 = "abc.com";
     public static final String SAMPLE_ATTRIBUTE_NAME2 = "to";
