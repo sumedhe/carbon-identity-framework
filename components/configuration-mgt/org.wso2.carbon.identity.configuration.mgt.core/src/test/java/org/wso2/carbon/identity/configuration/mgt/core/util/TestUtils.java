@@ -51,6 +51,7 @@ import static org.wso2.carbon.identity.configuration.mgt.core.constant.TestConst
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.TestConstants.SAMPLE_ATTRIBUTE_VALUE3;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.TestConstants.SAMPLE_RESOURCE_NAME1;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.TestConstants.SAMPLE_RESOURCE_NAME2;
+import static org.wso2.carbon.identity.configuration.mgt.core.constant.TestConstants.SAMPLE_RESOURCE_NAME3;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.TestConstants.SAMPLE_RESOURCE_TYPE_DESCRIPTION;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.TestConstants.SAMPLE_RESOURCE_TYPE_NAME1;
 import static org.wso2.carbon.identity.configuration.mgt.core.constant.TestConstants.SAMPLE_RESOURCE_TYPE_NAME2;
@@ -121,6 +122,13 @@ public class TestUtils {
         resourceTypeAdd.setName(SAMPLE_RESOURCE_TYPE_NAME2);
         resourceTypeAdd.setDescription(SAMPLE_RESOURCE_TYPE_DESCRIPTION);
         return resourceTypeAdd;
+    }
+
+    public static ResourceAdd getSampleResource3Add() {
+
+        ResourceAdd resourceAdd = new ResourceAdd();
+        resourceAdd.setName(SAMPLE_RESOURCE_NAME3);
+        return resourceAdd;
     }
 
     public static ResourceAdd getSampleResource1Add() {
